@@ -1,0 +1,11 @@
+import RegisterForm from "../components/auth/RegisterForm";
+
+function RegisterPage() {
+  return (
+    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+      <RegisterForm />
+    </div>
+  );
+}
+
+export default RegisterPage;
