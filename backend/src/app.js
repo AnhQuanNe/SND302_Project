@@ -1,19 +1,13 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const connectDB = require('./config/database');
+import express from "express";
+import cors from "cors";
 
-require('dotenv').config();
+import routes from "./routes/index.js";
 
 const app = express();
-app.use(bodyParser.json());
 
-// Kết nối MongoDB
-connectDB();
+app.use(cors());
+app.use(express.json());
 
-// Routes
+app.use("/api", routes);
 
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
+export default app;
