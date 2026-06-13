@@ -83,7 +83,6 @@ export const register = async (req, res) => {
       fullName,
       email,
       password: hashedPassword,
-      role,
     });
 
     const token = generateToken({id: user._id, role: user.role});

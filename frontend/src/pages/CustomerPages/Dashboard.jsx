@@ -7,7 +7,7 @@ function Dashboard() {
         Customer Dashboard
       </h1>
 
-      <ServiceList />
+      {/* <ServiceList /> */}
     </div>
   );
 }
