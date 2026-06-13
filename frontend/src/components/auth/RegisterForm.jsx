@@ -40,9 +40,9 @@ function RegisterForm() {
         password: formData.password,
       });
 
-      alert("Register Success!");
+      alert("Verification code has been sent to your email");
 
-      navigate("/");
+      navigate("/verify-email");
     } catch (error) {
       setError(
         error.response?.data?.message ||

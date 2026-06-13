@@ -80,7 +80,7 @@ function LoginPage() {
                 marginBottom: "8px",
               }}
             >
-              Welcome Back
+              Xin Chào 
             </h2>
 
             <p
@@ -89,7 +89,7 @@ function LoginPage() {
                 fontSize: "15px",
               }}
             >
-              Sign in to continue
+              Đăng nhập để tiếp tục
             </p>
           </div>
 
