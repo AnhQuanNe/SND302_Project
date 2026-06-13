@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { generateToken } from "../utils/jwt.utils.js";
 
 export const login = async (req, res) => {
   try {
@@ -64,6 +65,13 @@ export const register = async (req, res) => {
       return res.status(400).json({
         message: "Email already exists",
       });
+    };
+
+    const allowedRoles = ["customer", "staff"];
+    if (role && !allowedRoles.includes(role)){
+      return res.status(400).json({
+        message: "Invalid Role"
+      })
     }
 
     const hashedPassword = await bcrypt.hash(
@@ -78,9 +86,17 @@ export const register = async (req, res) => {
       role,
     });
 
+    const token = generateToken({id: user._id, role: user.role});
+
     res.status(201).json({
       message: "Register success",
-      user,
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role
+      },
     });
   } catch (error) {
     res.status(500).json({

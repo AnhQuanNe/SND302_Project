@@ -20,11 +20,11 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
 
         {/* Customer */}
-        <Route path="/customer" element={<CustomerDashboard />} />
+        <Route path="/customer/dashboard" element={<CustomerDashboard />} />
         <Route path="/customer/get-queue" element={<GetQueue />} />
 
         {/* Staff */}
-        <Route path="/staff" element={<StaffDashboard />} />
+        <Route path="/staff/dashboard" element={<StaffDashboard />} />
 
         {/* Admin */}
         <Route
@@ -43,9 +43,38 @@ function App() {
     </ProtectedRoute>
   }
 />
+
+<Route
+  path="/customer/dashboard"
+  element={
+    <ProtectedRoute>
+      <CustomerDashboard />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/customer/get-queue"
+  element={
+    <ProtectedRoute>
+      <GetQueue />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/staff/dashboard"
+  element={
+    <ProtectedRoute>
+      <StaffDashboard />
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );
+
+  
 }
 
 export default App;

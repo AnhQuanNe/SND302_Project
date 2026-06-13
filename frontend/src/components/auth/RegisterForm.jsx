@@ -1,13 +1,19 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import authService from "../../services/auth.service.js"
 
 function RegisterForm() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
+    role: "customer"
   });
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -24,6 +30,16 @@ function RegisterForm() {
       return;
     }
 
+    setLoading(true)
+    try{
+      const res = await authService.register(formData);
+
+      if(res.token){
+        localStorage.setItem("token", res.token);
+      }
+    }catch(error){
+
+    }
     console.log(formData);
 
     alert("Register Success");
