@@ -19,6 +19,7 @@ function LoginForm() {
       );
 
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       const role = res.data.user.role;
 
@@ -46,7 +47,7 @@ function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           style={{
             width: "100%",
-            padding: "14px 16px",
+            padding: "14px 2px",
             border: "1px solid #e2e8f0",
             borderRadius: "8px",
             fontSize: "16px",
@@ -65,7 +66,7 @@ function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           style={{
             width: "100%",
-            padding: "14px 16px",
+            padding: "14px 2px",
             border: "1px solid #e2e8f0",
             borderRadius: "8px",
             fontSize: "16px",

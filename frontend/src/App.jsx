@@ -20,29 +20,38 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
 
         {/* Customer */}
-        <Route path="/customer" element={<CustomerDashboard />} />
-        <Route path="/customer/get-queue" element={<GetQueue />} />
+        <Route
+          path="/customer"
+          element={
+           <ProtectedRoute role="customer">
+           <CustomerDashboard />
+           </ProtectedRoute>
+         }
+        />
+        
 
         {/* Staff */}
         <Route path="/staff" element={<StaffDashboard />} />
 
         {/* Admin */}
         <Route
-  path="/admin/dashboard"
-  element={
-    <ProtectedRoute>
-      <AdminDashboard />
-    </ProtectedRoute>
-  }
-/>
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
-  path="/admin/users"
-  element={
-    <ProtectedRoute>
-      <UserManagement />
-    </ProtectedRoute>
-  }
-/>
+          path="/admin/users"
+          element={
+            <ProtectedRoute role="admin">
+              <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );

@@ -1,13 +1,19 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function RegisterForm() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({
@@ -16,17 +22,34 @@ function RegisterForm() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
 
-    console.log(formData);
+    try {
+      setLoading(true);
 
-    alert("Register Success");
+      await axios.post("http://localhost:5000/api/auth/register", {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      alert("Register Success!");
+      navigate("/"); // quay về login
+
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Register failed. Try again!"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

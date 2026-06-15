@@ -27,7 +27,7 @@ function LoginPage() {
             margin: 0,
             letterSpacing: "-0.02em"
           }}>
-            Admin<span style={{ color: "#378ADD" }}>.</span>
+            Queue System<span style={{ color: "#378ADD" }}>.</span>
           </h1>
           <p style={{ 
             color: "#64748b", 
@@ -35,7 +35,7 @@ function LoginPage() {
             fontSize: "18px",
             fontWeight: 500 
           }}>
-            Hệ thống quản lý
+            Hệ thống quản lý hàng chờ thông minh
           </p>
         </div>
 
@@ -73,7 +73,7 @@ function LoginPage() {
           fontSize: "13px",
           textAlign: "center"
         }}>
-          © 2026 Admin System. All rights reserved.
+          © 2026 Queue Management System. All rights reserved.
         </div>
       </div>
     </div>
