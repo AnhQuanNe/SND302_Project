@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import authService from "../../../../backend/src/services/auth.service";
 
 function RegisterForm() {
   const navigate = useNavigate();
@@ -12,8 +12,8 @@ function RegisterForm() {
     confirmPassword: "",
   });
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -27,25 +27,27 @@ function RegisterForm() {
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match!");
+      setError("Passwords do not match.");
       return;
     }
 
-    try {
-      setLoading(true);
+    setError("");
+    setLoading(true);
 
-      await axios.post("http://localhost:5000/api/auth/register", {
+    try {
+      await authService.register({
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
       });
 
-      alert("Register Success!");
-      navigate("/"); // quay về login
+      alert("Verification code has been sent to your email");
 
-    } catch (err) {
+      navigate("/verify-email");
+    } catch (error) {
       setError(
-        err.response?.data?.message || "Register failed. Try again!"
+        error.response?.data?.message ||
+          "Register failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -53,20 +55,30 @@ function RegisterForm() {
   };
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-lg w-[400px]">
-      <h2 className="text-3xl font-bold text-center mb-6 text-blue-600">
-        Create Account
-      </h2>
-
-      <form onSubmit={handleSubmit}>
+    <>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+        }}
+      >
         <input
           type="text"
           name="fullName"
           placeholder="Full Name"
           value={formData.fullName}
           onChange={handleChange}
-          className="w-full border p-3 rounded-lg mb-4"
           required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
         />
 
         <input
@@ -75,8 +87,15 @@ function RegisterForm() {
           placeholder="Email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full border p-3 rounded-lg mb-4"
           required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
         />
 
         <input
@@ -85,8 +104,15 @@ function RegisterForm() {
           placeholder="Password"
           value={formData.password}
           onChange={handleChange}
-          className="w-full border p-3 rounded-lg mb-4"
           required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
         />
 
         <input
@@ -95,28 +121,74 @@ function RegisterForm() {
           placeholder="Confirm Password"
           value={formData.confirmPassword}
           onChange={handleChange}
-          className="w-full border p-3 rounded-lg mb-6"
           required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
         />
+
+        {error && (
+          <div
+            style={{
+              color: "#ef4444",
+              fontSize: "14px",
+              textAlign: "center",
+              padding: "8px",
+              background: "#fee2e2",
+              borderRadius: "6px",
+            }}
+          >
+            {error}
+          </div>
+        )}
 
         <button
           type="submit"
-          className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700"
+          disabled={loading}
+          style={{
+            width: "100%",
+            background: loading ? "#93c5fd" : "#378ADD",
+            color: "white",
+            padding: "14px",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "16px",
+            fontWeight: 600,
+            cursor: loading ? "not-allowed" : "pointer",
+            marginTop: "8px",
+            transition: "all 0.2s",
+          }}
         >
-          Register
+          {loading ? "Creating account..." : "Register"}
         </button>
       </form>
 
-      <p className="text-center mt-4">
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "20px",
+          fontSize: "14px",
+          color: "#64748b",
+        }}
+      >
         Already have an account?{" "}
         <Link
           to="/"
-          className="text-blue-600 font-semibold hover:underline"
+          style={{
+            color: "#378ADD",
+            fontWeight: 600,
+            textDecoration: "none",
+          }}
         >
           Login
         </Link>
-      </p>
-    </div>
+      </div>
+    </>
   );
 }
 
