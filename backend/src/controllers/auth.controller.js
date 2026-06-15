@@ -62,11 +62,11 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
   try {
-    const { fullName, email, password, role } =
-      req.body;
+    const { fullName, email, password, role } = req.body;
 
+    const normalizedEmail = email.toLowerCase().trim(); //Tranh loi "User Not Found";
     const existedUser = await User.findOne({
-      email,
+      email: normalizedEmail,
     });
 
     //Sinh ma OTP 6 so
@@ -94,27 +94,32 @@ export const register = async (req, res) => {
 
     const user = await User.create({
       fullName,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       verificationCode,
-      verificationExpiry: Date.now() + 10 * 60 * 1000
+      verificationExpiry: Date.now() + 10 * 60 * 1000,
+      verified: false //Chua verified
     });
 
     //Send email OTP
     await sendVerificationEmail(user.email, verificationCode);
 
-    const token = generateToken({id: user._id, role: user.role});
+    // const token = generateToken({id: user._id, role: user.role});
 
-    res.status(201).json({
-      message: "Register success",
-      token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role
-      },
-    });
+    return res.status(201).json({
+      message: "Register Success. Please verify your email"
+    })
+
+    // res.status(201).json({
+    //   message: "Register success",
+    //   token,
+    //   user: {
+    //     id: user._id,
+    //     fullName: user.fullName,
+    //     email: user.email,
+    //     role: user.role
+    //   },
+    // });
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -126,7 +131,7 @@ export const register = async (req, res) => {
 export const verifyEmail = async (req, res) => {
   try{
     const {email, code} = req.body;
-    const user = await User.findOne({email})
+    const user = await User.findOne({email: email.toLowerCase().trim()})
 
     if (!user){
       return res.status(404).json({
@@ -134,7 +139,7 @@ export const verifyEmail = async (req, res) => {
       });
     }
 
-    if (user.verificationCode !== code){
+    if (user.verificationCode !== code.toString()){
       return res.status(400).json({
         message: "Invalid verification code !!!"
       });
@@ -165,7 +170,9 @@ export const verifyEmail = async (req, res) => {
 export const resendOTP = async (req, res) => {
   try{
     const {email} = req.body;
-    const user = await User.findOne({email});
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({email: normalizedEmail});
 
     if (!user){
       return res.status(404).json({

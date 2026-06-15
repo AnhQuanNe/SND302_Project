@@ -1,20 +1,72 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 function VerifyEmailForm() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const emailFromRegister = location.state?.email;
 
-    const [email, setEmail] = useState("");
-    const [code, setCode] = useState("");
+  const [email] = useState(emailFromRegister || "");
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60); // 60 giây đếm ngược
+  const [canResend, setCanResend] = useState(false);
 
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [resendLoading, setResendLoading] = useState(false);
+  const inputRefs = useRef([]);
 
-    const handleVerify = async (e) => {
+  // Đếm ngược thời gian
+  useEffect(() => {
+    if (!email) {
+      navigate("/register");
+      return;
+    }
+
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setCanResend(true);
+    }
+  }, [timeLeft, email, navigate]);
+
+  const handleChange = (index, value) => {
+    if (isNaN(value)) return;
+    const newCode = [...code];
+    newCode[index] = value.slice(-1);
+    setCode(newCode);
+
+    if (value && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !code[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
+  const handlePaste = (e) => {
     e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").slice(0, 6);
+    if (/^\d+$/.test(pastedData)) {
+      const newCode = pastedData.split("").concat(Array(6 - pastedData.length).fill(""));
+      setCode(newCode);
+    }
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    const verificationCode = code.join("");
+
+    if (verificationCode.length !== 6) {
+      setError("Vui lòng nhập đủ 6 số");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -23,51 +75,39 @@ function VerifyEmailForm() {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/auth/verify-email",
-        {
-          email,
-          code,
-        }
+        { email, code: verificationCode }
       );
-
       setSuccess(res.data.message);
-
+      
       setTimeout(() => {
-        navigate("/");
+        navigate("/"); 
       }, 1500);
-
-    } catch (error) {
-      setError(
-        error.response?.data?.message ||
-        "Verification failed"
-      );
+    } catch (err) {
+      setError(err.response?.data?.message || "Xác thực thất bại");
     } finally {
       setLoading(false);
     }
   };
 
   const handleResendOTP = async () => {
+    if (!canResend) return;
+
     setResendLoading(true);
     setError("");
     setSuccess("");
 
     try {
-
       const res = await axios.post(
         "http://localhost:5000/api/auth/resend-otp",
-        {
-          email,
-        }
+        { email }
       );
-
       setSuccess(res.data.message);
-
-    } catch (error) {
-
-      setError(
-        error.response?.data?.message ||
-        "Cannot resend OTP"
-      );
-
+      
+      // Reset đếm ngược
+      setTimeLeft(60);
+      setCanResend(false);
+    } catch (err) {
+      setError(err.response?.data?.message || "Không thể gửi lại OTP");
     } finally {
       setResendLoading(false);
     }
@@ -82,90 +122,56 @@ function VerifyEmailForm() {
         padding: "2.5rem",
         borderRadius: "16px",
         boxShadow: "0 10px 30px rgba(0,0,0,.08)",
-        border: "1px solid #e5e7eb"
+        border: "1px solid #e5e7eb",
+        margin: "auto"
       }}
     >
       <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-        <h2
-          style={{
-            fontSize: "30px",
-            color: "#1e293b",
-            marginBottom: "8px"
-          }}
-        >
+        <h2 style={{ fontSize: "30px", color: "#1e293b", marginBottom: "8px" }}>
           Verify Email
         </h2>
-
-        <p
-          style={{
-            color: "#64748b",
-            fontSize: "15px"
-          }}
-        >
-          Enter the verification code sent to your email
+        <p style={{ color: "#64748b", fontSize: "15px" }}>
+          Nhập mã xác thực đã gửi đến<br />
+          <strong>{email}</strong>
         </p>
       </div>
 
-      <form
-        onSubmit={handleVerify}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem"
-        }}
-      >
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            padding: "14px 16px",
-            border: "1px solid #e2e8f0",
-            borderRadius: "8px",
-            fontSize: "16px"
-          }}
-          required
-        />
-
-        <input
-          type="text"
-          placeholder="Verification Code"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          style={{
-            padding: "14px 16px",
-            border: "1px solid #e2e8f0",
-            borderRadius: "8px",
-            fontSize: "16px"
-          }}
-          required
-        />
+      <form onSubmit={handleVerify} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+        {/* 6 ô OTP */}
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+          {code.map((digit, index) => (
+            <input
+              key={index}
+              ref={(el) => (inputRefs.current[index] = el)}
+              type="text"
+              maxLength="1"
+              value={digit}
+              onChange={(e) => handleChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(index, e)}
+              onPaste={handlePaste}
+              style={{
+                width: "52px",
+                height: "58px",
+                textAlign: "center",
+                fontSize: "24px",
+                fontWeight: "600",
+                border: "2px solid #e2e8f0",
+                borderRadius: "10px",
+                outline: "none",
+                transition: "all 0.2s",
+              }}
+              onFocus={(e) => e.target.select()}
+            />
+          ))}
+        </div>
 
         {error && (
-          <div
-            style={{
-              color: "#dc2626",
-              background: "#fee2e2",
-              padding: "10px",
-              borderRadius: "8px",
-              textAlign: "center"
-            }}
-          >
+          <div style={{ color: "#dc2626", background: "#fee2e2", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
             {error}
           </div>
         )}
-
         {success && (
-          <div
-            style={{
-              color: "#166534",
-              background: "#dcfce7",
-              padding: "10px",
-              borderRadius: "8px",
-              textAlign: "center"
-            }}
-          >
+          <div style={{ color: "#166534", background: "#dcfce7", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
             {success}
           </div>
         )}
@@ -181,57 +187,45 @@ function VerifyEmailForm() {
             borderRadius: "8px",
             fontSize: "16px",
             fontWeight: "600",
-            cursor: "pointer"
+            cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          {loading ? "Verifying..." : "Verify Email"}
+          {loading ? "Đang xác thực..." : "Xác thực Email"}
         </button>
       </form>
 
-      <div
-        style={{
-          marginTop: "20px",
-          textAlign: "center"
-        }}
-      >
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
         <button
           onClick={handleResendOTP}
-          disabled={resendLoading}
+          disabled={!canResend || resendLoading}
           style={{
             background: "transparent",
             border: "none",
-            color: "#378ADD",
-            cursor: "pointer",
-            fontWeight: "600"
+            color: canResend ? "#378ADD" : "#94a3b8",
+            cursor: canResend ? "pointer" : "not-allowed",
+            fontWeight: "600",
+            fontSize: "15px",
           }}
         >
-          {resendLoading
-            ? "Sending..."
-            : "Resend OTP"}
+          {resendLoading 
+            ? "Đang gửi..." 
+            : canResend 
+              ? "Gửi lại mã OTP" 
+              : `Gửi lại sau ${timeLeft}s`}
         </button>
       </div>
 
-      <div
-        style={{
-          marginTop: "20px",
-          textAlign: "center",
-          fontSize: "14px"
-        }}
-      >
-        Back to{" "}
+      <div style={{ marginTop: "20px", textAlign: "center", fontSize: "14px" }}>
+        Quay lại{" "}
         <Link
-          to="/"
-          style={{
-            color: "#378ADD",
-            textDecoration: "none",
-            fontWeight: "600"
-          }}
+          to="/register"
+          style={{ color: "#378ADD", textDecoration: "none", fontWeight: "600" }}
         >
-          Login
+          Đăng ký
         </Link>
       </div>
     </div>
   );
-};
+}
 
 export default VerifyEmailForm;

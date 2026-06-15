@@ -41,8 +41,10 @@ function RegisterForm() {
       });
 
       alert("Verification code has been sent to your email");
-
-      navigate("/verify-email");
+      
+      navigate("/verify-email", {
+        state: {email: formData.email}
+      });
     } catch (error) {
       setError(
         error.response?.data?.message ||
