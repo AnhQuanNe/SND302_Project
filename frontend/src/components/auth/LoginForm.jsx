@@ -28,7 +28,7 @@ function LoginForm() {
       } else if (role === "staff") {
         window.location.href = "/staff/dashboard";
       } else {
-        window.location.href = "/customer/dashboard";
+        window.location.href = "/customer";
       }
     } catch (error) {
       setError(error.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
