@@ -1,7 +1,8 @@
 import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
-import authService from "../../../../backend/src/services/auth.service";
+import {login} from "../../services/auth.service.js";
+
 
 function LoginForm() {
   const navigate = useNavigate();
@@ -19,13 +20,16 @@ function LoginForm() {
     try {
       console.log("🔍 Đang login:", { email });
 
-      const res = await authService.login({ email, password });
+      const res = await login({ email, password });
 
       console.log("✅ Login response:", res);
 
       if (res.token) {
         localStorage.setItem("token", res.token);
         localStorage.setItem("user", JSON.stringify(res.user));
+
+        console.log("token =", localStorage.getItem("token"));
+        console.log("user =", localStorage.getItem("user"));
 
         const role = res.user?.role;
 

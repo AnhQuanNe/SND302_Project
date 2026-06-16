@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import authService from "../../../../backend/src/services/auth.service";
+import {register} from "../../services/auth.service.js"
 
 function RegisterForm() {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ function RegisterForm() {
     setLoading(true);
 
     try {
-      await authService.register({
+      await register({
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,

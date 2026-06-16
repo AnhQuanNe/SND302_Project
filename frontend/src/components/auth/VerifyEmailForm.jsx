@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import authService from "../../../../backend/src/services/auth.service";
+import {verifyEmail, resendOTP} from "../../services/auth.service.js";
 
 function VerifyEmailForm() {
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ function VerifyEmailForm() {
     try {
       console.log("🔍 Đang verify:", { email, code: verificationCode });
 
-      const res = await authService.verifyEmail({
+      const res = await verifyEmail({
         email,
         code: verificationCode
       });
@@ -121,7 +121,7 @@ function VerifyEmailForm() {
     setSuccess("");
 
     try {
-      const res = await authService.resendOTP({ email });
+      const res = await resendOTP({ email });
       setSuccess(res.message || "Mã OTP mới đã được gửi đến email của bạn!");
 
       // Reset countdown
