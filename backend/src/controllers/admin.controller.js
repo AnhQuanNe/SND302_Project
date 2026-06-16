@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 
 // GET ALL
 export const getUsers = async (req, res) => {
@@ -76,6 +77,12 @@ export const getUserById = async (req, res) => {
 // LOCK
 export const lockUser = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid user id",
+      });
+    }
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { status: "inactive" },
@@ -102,6 +109,12 @@ export const lockUser = async (req, res) => {
 // UNLOCK
 export const unlockUser = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid user id",
+      });
+    }
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { status: "active" },

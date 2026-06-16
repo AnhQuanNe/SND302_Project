@@ -23,4 +23,6 @@ router.patch("/users/:id/lock", lockUser);
 
 router.patch("/users/:id/unlock", unlockUser);
 
+router.delete("/users/:id", lockUser);
+
 export default router;
