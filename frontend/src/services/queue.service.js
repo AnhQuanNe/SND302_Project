@@ -1,10 +1,9 @@
-import axios from "axios";
+import API from "./api";
 
-export const getServices = () =>
-  axios.get("http://localhost:5000/api/services"); // ❌ không dùng api
+export const getServices = () => API.get("/services");
 
 export const createQueue = (serviceId) =>
-  axios.post("http://localhost:5000/api/queue", { serviceId });
+  API.post("/queue", { serviceId });
 
 export const getWaitingTime = (serviceId) =>
-  axios.get(`http://localhost:5000/api/ai/predict/${serviceId}`);
+  API.get(`/ai/predict/${serviceId}`);

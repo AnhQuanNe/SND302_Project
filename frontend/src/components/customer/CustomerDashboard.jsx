@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { createQueue } from "../../services/queue.service";
+import { getServices, createQueue } from "../../services/queue.service";
 
 const CustomerDashboard = () => {
   const [services, setServices] = useState([]);
@@ -13,7 +12,7 @@ const CustomerDashboard = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/services");
+        const res = await getServices(); // ✅ dùng service
         setServices(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error(err);
@@ -100,7 +99,7 @@ const handleLogout = () => {
           <div style={styles.grid}>
             {services.map((s, index) => (
               <div
-                ey={s._id}
+                key={s._id}
                 style={styles.card}
                 onClick={() => handleCreateQueue(s._id)}
               >
