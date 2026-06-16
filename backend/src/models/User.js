@@ -23,6 +23,12 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "staff", "customer"],
       default: "customer",
     },
+    // Status
+    status: {
+        type: String,
+        enum: ["active", "inactive", "banned"],
+        default: "active"
+    },
     verified: {
         type: Boolean,
         default: false
@@ -33,7 +39,7 @@ const userSchema = new mongoose.Schema(
   },
   {
       timestamps: true,
-    }
+  }
 );
 
 export default mongoose.model("User", userSchema);

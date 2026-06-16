@@ -28,7 +28,8 @@ async function seedAdmin() {
       email: "admin@gmail.com",
       password: hashedPassword,
       role: "admin",
-      verified: true
+      verified: true,
+      status: "active"
     });
 
     console.log("Admin created successfully");

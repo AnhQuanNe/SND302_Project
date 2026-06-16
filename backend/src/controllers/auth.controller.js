@@ -8,11 +8,31 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(404).json({
         message: "User not found",
+      });
+    }
+
+    if (user.status === "pending") {
+      return res.status(403).json({
+        message: "Your account is waiting for approval"
+      });
+    }
+
+    if (user.status === "inactive") {
+      return res.status(403).json({
+        message: "Your account has been disabled"
+      });
+    }
+
+    if (user.status === "banned") {
+      return res.status(403).json({
+        message: "Your account has been banned"
       });
     }
 
@@ -98,7 +118,8 @@ export const register = async (req, res) => {
       password: hashedPassword,
       verificationCode,
       verificationExpiry: Date.now() + 10 * 60 * 1000,
-      verified: false //Chua verified
+      verified: false, //Chua verified,
+      status: "active"
     });
 
     //Send email OTP
@@ -110,16 +131,6 @@ export const register = async (req, res) => {
       message: "Register Success. Please verify your email"
     })
 
-    // res.status(201).json({
-    //   message: "Register success",
-    //   token,
-    //   user: {
-    //     id: user._id,
-    //     fullName: user.fullName,
-    //     email: user.email,
-    //     role: user.role
-    //   },
-    // });
   } catch (error) {
     res.status(500).json({
       message: error.message,
