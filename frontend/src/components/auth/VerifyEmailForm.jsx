@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import authService from "../../../../backend/src/services/auth.service";
 
 function VerifyEmailForm() {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ function VerifyEmailForm() {
     }
   };
 
-  const handleVerify = async (e) => {
+    const handleVerify = async (e) => {
     e.preventDefault();
     const verificationCode = code.join("");
 
@@ -73,23 +74,46 @@ function VerifyEmailForm() {
     setSuccess("");
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/verify-email",
-        { email, code: verificationCode }
-      );
-      setSuccess(res.data.message);
-      
+      console.log("🔍 Đang verify:", { email, code: verificationCode });
+
+      const res = await authService.verifyEmail({
+        email,
+        code: verificationCode
+      });
+
+      console.log("✅ Verify response:", res);
+
+      // === PHẦN QUAN TRỌNG: Xử lý response ===
+      setSuccess(res.message || "Xác thực thành công!");
+
+      if (res.token) {
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res.user || {}));
+      }
+
+      // Chuyển trang
       setTimeout(() => {
-        navigate("/"); 
-      }, 1500);
+        const targetPath = res.user?.role === "staff" 
+          ? "/staff/dashboard" 
+          : "/";
+        navigate(targetPath);
+      }, 1200);
+
     } catch (err) {
-      setError(err.response?.data?.message || "Xác thực thất bại");
+      console.error("❌ Full Error:", err);
+      console.error("❌ Response Data:", err.response?.data);
+      
+      setError(
+        err.response?.data?.message || 
+        err.message || 
+        "Xác thực thất bại. Vui lòng thử lại."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResendOTP = async () => {
+    const handleResendOTP = async () => {
     if (!canResend) return;
 
     setResendLoading(true);
@@ -97,17 +121,19 @@ function VerifyEmailForm() {
     setSuccess("");
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/resend-otp",
-        { email }
-      );
-      setSuccess(res.data.message);
-      
-      // Reset đếm ngược
+      const res = await authService.resendOTP({ email });
+      setSuccess(res.message || "Mã OTP mới đã được gửi đến email của bạn!");
+
+      // Reset countdown
       setTimeLeft(60);
       setCanResend(false);
+
     } catch (err) {
-      setError(err.response?.data?.message || "Không thể gửi lại OTP");
+      console.error("❌ Resend OTP Error:", err.response?.data || err);
+      setError(
+        err.response?.data?.message || 
+        "Không thể gửi lại OTP. Vui lòng thử lại sau."
+      );
     } finally {
       setResendLoading(false);
     }

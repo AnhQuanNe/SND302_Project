@@ -1,7 +1,11 @@
 import { useState } from "react";
-import axios from "axios";
+
+import { useNavigate } from "react-router-dom";
+import authService from "../../../../backend/src/services/auth.service";
 
 function LoginForm() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -13,25 +17,34 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        { email, password }
-      );
+      console.log("🔍 Đang login:", { email });
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const res = await authService.login({ email, password });
 
-      const role = res.data.user.role;
+      console.log("✅ Login response:", res);
 
-      if (role === "admin") {
-        window.location.href = "/admin/dashboard";
-      } else if (role === "staff") {
-        window.location.href = "/staff/dashboard";
+      if (res.token) {
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res.user));
+
+        const role = res.user?.role;
+
+        if (role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (role === "staff") {
+          navigate("/staff/dashboard");
+        } else {
+          navigate("/customer/dashboard");
+        }
       } else {
-        window.location.href = "/customer/dashboard";
+        setError("Đăng nhập thất bại: Không nhận được token");
       }
-    } catch (error) {
-      setError(error.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+    } catch (err) {
+      console.error("❌ Login Error:", err.response?.data || err);
+      setError(
+        err.response?.data?.message || 
+        "Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu."
+      );
     } finally {
       setLoading(false);
     }

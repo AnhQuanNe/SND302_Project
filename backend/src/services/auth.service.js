@@ -10,4 +10,14 @@ const login = async (data) => {
     return response.data;
 }
 
-export default {register, login};
+const verifyEmail = async (data) => {
+    const response = await api.post("/auth/verify-email", data);
+    return response.data;
+}
+
+const resendOTP = async (data) => {
+    const response = await api.post("/auth/resend-otp", data);
+    return response.data;
+}
+
+export default {register, login, verifyEmail, resendOTP};
