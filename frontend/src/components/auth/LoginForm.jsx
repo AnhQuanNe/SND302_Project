@@ -1,7 +1,7 @@
 import { useState } from "react";
-
 import { useNavigate } from "react-router-dom";
 import {login} from "../../services/auth.service.js";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 
 function LoginForm() {
@@ -11,6 +11,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,18 +19,11 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      console.log("🔍 Đang login:", { email });
-
       const res = await login({ email, password });
-
-      console.log("✅ Login response:", res);
 
       if (res.token) {
         localStorage.setItem("token", res.token);
         localStorage.setItem("user", JSON.stringify(res.user));
-
-        console.log("token =", localStorage.getItem("token"));
-        console.log("user =", localStorage.getItem("user"));
 
         const role = res.user?.role;
 
@@ -75,9 +69,9 @@ function LoginForm() {
         />
       </div>
 
-      <div>
+      <div style={{ position: "relative" }}>
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           placeholder="Mật khẩu"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -91,6 +85,24 @@ function LoginForm() {
           }}
           required
         />
+
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          style={{
+            position: "absolute",
+            right: "12px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+            color: "#64748b",
+            fontSize: "18px"
+          }}
+        >
+          {showPassword ? <FaEyeSlash /> : <FaEye />}
+        </button>
       </div>
 
       {error && (
