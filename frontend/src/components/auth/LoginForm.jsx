@@ -34,7 +34,7 @@ function LoginForm() {
         } else if (role === "staff") {
           navigate("/staff/dashboard");
         } else {
-          navigate("/customer/dashboard");
+          navigate("/customer");
         }
       } else {
         window.location.href = "/customer";
