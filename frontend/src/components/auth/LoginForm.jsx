@@ -37,7 +37,7 @@ function LoginForm() {
           navigate("/customer/dashboard");
         }
       } else {
-        setError("Đăng nhập thất bại: Không nhận được token");
+        window.location.href = "/customer";
       }
     } catch (err) {
       console.error("❌ Login Error:", err.response?.data || err);
@@ -60,7 +60,7 @@ function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           style={{
             width: "100%",
-            padding: "14px 16px",
+            padding: "14px 2px",
             border: "1px solid #e2e8f0",
             borderRadius: "8px",
             fontSize: "16px",
@@ -79,7 +79,7 @@ function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           style={{
             width: "100%",
-            padding: "14px 16px",
+            padding: "14px 2px",
             border: "1px solid #e2e8f0",
             borderRadius: "8px",
             fontSize: "16px",

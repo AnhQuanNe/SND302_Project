@@ -23,56 +23,38 @@ function App() {
         <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         {/* Customer */}
-        <Route path="/customer/dashboard" element={<CustomerDashboard />} />
-        <Route path="/customer/get-queue" element={<GetQueue />} />
+        <Route
+          path="/customer"
+          element={
+           <ProtectedRoute role="customer">
+           <CustomerDashboard />
+           </ProtectedRoute>
+         }
+        />
+        
 
         {/* Staff */}
         <Route path="/staff/dashboard" element={<StaffDashboard />} />
 
         {/* Admin */}
         <Route
-  path="/admin/dashboard"
-  element={
-    <ProtectedRoute>
-      <AdminDashboard />
-    </ProtectedRoute>
-  }
-/>
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
-  path="/admin/users"
-  element={
-    <ProtectedRoute>
-      <UserManagement />
-    </ProtectedRoute>
-  }
-/>
+          path="/admin/users"
+          element={
+            <ProtectedRoute role="admin">
+              <UserManagement />
+            </ProtectedRoute>
+          }
+        />
 
-<Route
-  path="/customer/dashboard"
-  element={
-    <ProtectedRoute>
-      <CustomerDashboard />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/customer/get-queue"
-  element={
-    <ProtectedRoute>
-      <GetQueue />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/staff/dashboard"
-  element={
-    <ProtectedRoute>
-      <StaffDashboard />
-    </ProtectedRoute>
-  }
-/>
       </Routes>
     </BrowserRouter>
   );

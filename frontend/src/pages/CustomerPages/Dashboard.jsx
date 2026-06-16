@@ -1,13 +1,9 @@
-import ServiceList from "../../components/customer/ServiceList";
+import CustomerDashboard from "../../components/customer/CustomerDashboard";
 
 function Dashboard() {
   return (
     <div className="p-5">
-      <h1 className="text-3xl font-bold">
-        Customer Dashboard
-      </h1>
-
-      {/* <ServiceList /> */}
+      <CustomerDashboard />
     </div>
   );
 }
