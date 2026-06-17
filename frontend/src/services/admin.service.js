@@ -1,14 +1,14 @@
-import axios from "axios";
+import API from "./api";
 
-const API_URL = "http://localhost:5000/api/admin/users";
+const BASE = "/admin/users";
 
-export const getUsers = () => axios.get(API_URL);
+export const getUsers = () => API.get(BASE);
 
 export const createUser = (data) =>
-  axios.post(API_URL, data);
+  API.post(BASE, data);
 
 export const updateUser = (id, data) =>
-  axios.put(`${API_URL}/${id}`, data);
+  API.put(`${BASE}/${id}`, data);
 
 export const deleteUser = (id) =>
-  axios.delete(`${API_URL}/${id}`);
+  API.delete(`${BASE}/${id}`);
