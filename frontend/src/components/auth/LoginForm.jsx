@@ -21,11 +21,11 @@ function LoginForm() {
     try {
       const res = await login({ email, password });
 
-      if (res.token) {
-        localStorage.setItem("token", res.token);
-        localStorage.setItem("user", JSON.stringify(res.user));
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
 
-        const role = res.user?.role;
+        const role = res.data.user?.role;
 
         if (role === "admin") {
           navigate("/admin/dashboard");

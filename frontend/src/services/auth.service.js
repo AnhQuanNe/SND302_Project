@@ -17,3 +17,9 @@ export const login = (data) =>
 
 export const register = (data) =>
   API.post(`${BASE}/register`, data);
+
+export const verifyEmail = (data) =>
+  API.post(`${BASE}/verify-email`, data);
+
+export const resendOTP = (data) =>
+  API.post(`${BASE}/resend-otp`, data);
