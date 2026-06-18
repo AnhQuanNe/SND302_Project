@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import authService from "../../../../backend/src/services/auth.service";
+import authService from "../../services/auth.service";
 
 function RegisterForm() {
   const navigate = useNavigate();
@@ -42,14 +42,14 @@ function RegisterForm() {
       });
 
       alert("Verification code has been sent to your email");
-      
+
       navigate("/verify-email", {
-        state: {email: formData.email}
+        state: { email: formData.email }
       });
     } catch (error) {
       setError(
         error.response?.data?.message ||
-          "Register failed. Please try again."
+        "Register failed. Please try again."
       );
     } finally {
       setLoading(false);

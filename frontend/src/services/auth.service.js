@@ -12,8 +12,24 @@ import API from "./api";
 
 const BASE = "/auth";
 
-export const login = (data) =>
-  API.post(`${BASE}/login`, data);
+const register = async (data) => {
+  const response = await API.post(`${BASE}/register`, data);
+  return response.data;
+};
 
-export const register = (data) =>
-  API.post(`${BASE}/register`, data);
+const login = async (data) => {
+  const response = await API.post(`${BASE}/login`, data);
+  return response.data;
+};
+
+const verifyEmail = async (data) => {
+  const response = await API.post(`${BASE}/verify-email`, data);
+  return response.data;
+};
+
+const resendOTP = async (data) => {
+  const response = await API.post(`${BASE}/resend-otp`, data);
+  return response.data;
+};
+
+export default { register, login, verifyEmail, resendOTP };

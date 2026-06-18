@@ -36,7 +36,7 @@ export const login = async (req, res) => {
       });
     }
 
-    if (!user.verified){
+    if (!user.verified) {
       return res.status(401).json({
         message: "Please verify your email first!!!"
       })
@@ -101,7 +101,7 @@ export const register = async (req, res) => {
     };
 
     const allowedRoles = ["customer", "staff"];
-    if (role && !allowedRoles.includes(role)){
+    if (role && !allowedRoles.includes(role)) {
       return res.status(400).json({
         message: "Invalid Role"
       })
@@ -174,14 +174,14 @@ export const resendOTP = async (req, res) => {
       // return res.status(500).json({ message: "Không thể gửi email. Vui lòng kiểm tra cấu hình Gmail" });
     }
 
-    res.status(200).json({ 
-      message: "New OTP has been sent to your email" 
+    res.status(200).json({
+      message: "New OTP has been sent to your email"
     });
 
   } catch (error) {
     console.error("❌ Resend OTP Error:", error);
-    res.status(500).json({ 
-      message: "Không thể gửi lại OTP. Vui lòng thử lại sau." 
+    res.status(500).json({
+      message: "Không thể gửi lại OTP. Vui lòng thử lại sau."
     });
   }
 };

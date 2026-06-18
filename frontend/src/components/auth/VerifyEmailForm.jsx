@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import authService from "../../../../backend/src/services/auth.service";
+import authService from "../../services/auth.service";
 
 function VerifyEmailForm() {
   const navigate = useNavigate();

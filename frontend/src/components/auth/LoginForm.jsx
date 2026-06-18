@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
-import authService from "../../../../backend/src/services/auth.service";
+import authService from "../../services/auth.service";
 
 function LoginForm() {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ function LoginForm() {
     } catch (err) {
       console.error("❌ Login Error:", err.response?.data || err);
       setError(
-        err.response?.data?.message || 
+        err.response?.data?.message ||
         "Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu."
       );
     } finally {
