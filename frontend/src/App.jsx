@@ -5,6 +5,7 @@ import RegisterPage from "./pages/RegisterPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 import UserManagement from "./pages/AdminPages/UserManagement";
+import ServiceManagement from "./pages/AdminPages/ServiceManagement";
 import CustomerDashboard from "./pages/CustomerPages/Dashboard";
 import GetQueue from "./pages/CustomerPages/GetQueue";
 
@@ -51,6 +52,15 @@ function App() {
           element={
             <ProtectedRoute role="admin">
               <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/services"
+          element={
+            <ProtectedRoute role="admin">
+              <ServiceManagement />
             </ProtectedRoute>
           }
         />

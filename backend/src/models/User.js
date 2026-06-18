@@ -35,7 +35,22 @@ const userSchema = new mongoose.Schema(
     },
     verificationCode: String,
 
-    verificationExpiry: Date
+    verificationExpiry: Date,
+
+    gender: {
+      type: String,
+      enum: ["Nam", "Nữ", "Khác", ""],
+      default: "",
+    },
+
+    dob: {
+      type: Date,
+    },
+
+    phone: {
+      type: String,
+      default: "",
+    },
   },
   {
       timestamps: true,
