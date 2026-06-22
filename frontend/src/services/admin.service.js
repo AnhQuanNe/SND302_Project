@@ -2,7 +2,8 @@ import API from "./api";
 
 const BASE = "/admin/users";
 
-export const getUsers = () => API.get(BASE);
+export const getUsers = (page = 1, limit = 10) =>
+   API.get(BASE, {params: {page, limit}});
 
 // export const createUser = (data) =>
 //   API.post(BASE, data);
