@@ -9,9 +9,17 @@ export const getUsers = async (req, res) => {
     const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
     const skip = (page - 1) * limit;
 
+    const filterQuery = {};
+    if (req.query.roles) {
+      // Chuyển chuỗi "staff,admin" thành mảng ['staff', 'admin']
+      const rolesArray = req.query.roles.split(",");
+      // Dùng toán tử $in của MongoDB để tìm user có role nằm trong mảng
+      filterQuery.role = { $in: rolesArray,};
+    }
+
     const [users, totalUsers] = await Promise.all([
       User.find().skip(skip).limit(limit),
-      User.countDocuments(),
+      User.countDocuments(filterQuery),
     ]);
 
     res.json({
