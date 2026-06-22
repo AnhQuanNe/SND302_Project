@@ -113,7 +113,7 @@ export const lockUser = async (req, res) => {
       });
     }
 
-    const user = await User.findByIdAndUpdate(req.params.id);
+    const user = await User.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({
@@ -151,7 +151,7 @@ export const unlockUser = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { status: "active" },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     if (!user) {
