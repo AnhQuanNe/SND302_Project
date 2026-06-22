@@ -48,6 +48,11 @@ export default function UserTable({ users, pagination, onToggleLock }) {
                   </span>
                 </td>
                 <td className={`${styles.td} ${styles.tdActions}`}>
+                  {user.role === "admin" ? (
+                    <span style={{color: "a0aec0", fontSize: "0.85rem", userSelect: "none"}}>
+                      -
+                    </span>
+                  ) :(
                   <button
                     onClick={() => onToggleLock(user)}
                     className={`${styles.btn} ${
@@ -58,6 +63,7 @@ export default function UserTable({ users, pagination, onToggleLock }) {
                   >
                     {user.status === "inactive" ? "Mở khóa" : "Khóa"}
                   </button>
+                  )}
                 </td>
               </tr>
             ))}

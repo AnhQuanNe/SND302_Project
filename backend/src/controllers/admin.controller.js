@@ -105,17 +105,20 @@ export const lockUser = async (req, res) => {
       });
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { status: "inactive" },
-      { new: true }
-    );
+    const user = await User.findByIdAndUpdate(req.params.id);
 
     if (!user) {
       return res.status(404).json({
         message: "User not found",
       });
     }
+
+    if (user.role === "admin") {
+      return res.status(403).json({message: "Nghiệp vụ từ chối. Không thể khóa quản trị viên."});
+    }
+
+    user.status = "inactive";
+    await  user.save();
 
     res.json({
       message: "User locked successfully",
