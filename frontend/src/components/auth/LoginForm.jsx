@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {FaEye, FaEyeSlash} from "react-icons/fa";
 import authService from "../../services/auth.service";
 
 function LoginForm() {
@@ -17,13 +18,14 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      const res = await login({ email, password });
+      const res = await authService.login({ email, password });
 
-      if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+      console.log(res);
+      if (res.token) {
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res.user));
 
-        const role = res.data.user?.role;
+        const role = res.user?.role;
 
         if (role === "admin") {
           navigate("/admin/dashboard");

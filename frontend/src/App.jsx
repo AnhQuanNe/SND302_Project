@@ -3,6 +3,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
+import Feedback from "./components/customer/Feedback";
 
 import UserManagement from "./pages/AdminPages/UserManagement";
 import ServiceManagement from "./pages/AdminPages/ServiceManagement";
@@ -11,8 +12,6 @@ import StaffDashboard from "./pages/StaffPages/Dashboard";
 
 import AdminLayout from "./components/admin/Layout/AdminLayout";
 import AdminDashboard from "./pages/AdminPages/Dashboard";
-import UserManagement from "./pages/AdminPages/UserManagement";
-import ServiceManagement from "./pages/AdminPages/ServiceManagement";
 import AdminPlaceholderPage from "./pages/AdminPages/AdminPlaceholderPage";
 
 function App() {
@@ -50,6 +49,7 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="feedback" element={<Feedback />}/>
           <Route
             path="queue"
             element={

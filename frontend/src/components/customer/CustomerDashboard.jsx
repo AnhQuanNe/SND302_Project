@@ -6,6 +6,7 @@ import ActiveTicket from "./ActiveTicket";
 import ServiceList from "./ServiceList";
 import Loading from "../common/Loading";
 import Profile from "./Profile";
+import Feedback from "./Feedback";
 import "./CustomerDashboard.css";
 
 const CustomerDashboard = () => {
@@ -106,7 +107,7 @@ useEffect(() => {
     { label: "Home", active: activeView === "dashboard", onClick: () => setActiveView("dashboard") },
     { label: "Services", active: false, onClick: () => setActiveView("dashboard") },
     { label: "Track Queue", active: false, onClick: () => setActiveView("dashboard") },
-    { label: "Feedback", active: false, onClick: () => {} }
+    { label: "Feedback", active: activeView === "feedback", onClick: () => setActiveView("feedback") }
   ];
 
   return (
@@ -124,39 +125,58 @@ useEffect(() => {
       <main className="dashboard-main">
         {activeView === "profile" ? (
           <Profile onBack={() => setActiveView("dashboard")} />
+        ) : activeView === "feedback" ? (
+          <Feedback />
         ) : (
           <>
             {/* HERO */}
             <section className="hero-banner">
               <h1 className="hero-title">
-                Xin chào, <span className="hero-highlight">{currentUser?.fullName || "bạn"}</span>! 
+                Xin chào,{" "}
+                <span className="hero-highlight">
+                  {currentUser?.fullName || "bạn"}
+                </span>
+                !
               </h1>
+
               <p className="hero-subtitle">
                 Hệ thống đặt lịch xếp hàng trực tuyến tiện lợi. Chọn một dịch vụ dưới đây để bắt đầu lấy vé thứ tự của bạn.
               </p>
             </section>
 
-            {/* ACTIVE TICKET (Spotlight Card) */}
-            <ActiveTicket 
-              queue={currentQueue} 
-              service={activeService} 
-              onCancel={handleCancelQueue} 
+            {/* ACTIVE TICKET */}
+            <ActiveTicket
+              queue={currentQueue}
+              service={activeService}
+              onCancel={handleCancelQueue}
             />
 
             {/* SERVICES LIST */}
             <section className="services-section">
               <div className="services-list-header">
                 <h2 className="services-list-title">
-                  <i className="ti ti-grid-dots" style={{ color: "#2563eb" }}></i>
+                  <i
+                    className="ti ti-grid-dots"
+                    style={{ color: "#2563eb" }}
+                  ></i>
                   Chọn dịch vụ cần giao dịch
                 </h2>
-                <p className="services-list-subtitle">Nhấn lấy số để đăng ký số thứ tự tự động</p>
+
+                <p className="services-list-subtitle">
+                  Nhấn lấy số để đăng ký số thứ tự tự động
+                </p>
               </div>
 
               {loading ? (
-                <Loading type="spinner" message="Đang tải danh sách dịch vụ..." />
+                <Loading
+                  type="spinner"
+                  message="Đang tải danh sách dịch vụ..."
+                />
               ) : (
-                <ServiceList services={services} onBook={handleCreateQueue} />
+                <ServiceList
+                  services={services}
+                  onBook={handleCreateQueue}
+                />
               )}
             </section>
           </>
