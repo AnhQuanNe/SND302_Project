@@ -1,0 +1,113 @@
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes numberPop {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.active-ticket-section {
+  margin-bottom: 36px;
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+.active-ticket-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1.5px solid #bfdbfe;
+  border-left: 5px solid #2563eb;
+  padding: 32px 24px 24px 28px;
+  position: relative;
+  text-align: left;
+}
+
+.ticket-top-badge {
+  position: absolute;
+  top: 0; left: 28px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 4px 14px;
+  border-radius: 0 0 8px 8px;
+}
+
+.ticket-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.ticket-details {
+  flex: 1 1 260px;
+  text-align: left;
+}
+
+.ticket-service-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.ticket-description { font-size: 13px; color: #64748b; margin-bottom: 18px; }
+
+.ticket-meta-grid { display: flex; gap: 24px; }
+.ticket-meta-col  { display: flex; flex-direction: column; gap: 4px; }
+
+.ticket-meta-label {
+  font-size: 10px; font-weight: 700;
+  color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px;
+}
+
+.ticket-status-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+.status-waiting { color: #92400e; background: #fef3c7; }
+.status-serving  { color: #065f46; background: #d1fae5; }
+.ticket-wait-value { font-size: 13px; font-weight: 700; color: #059669; }
+
+.ticket-number-display {
+  text-align: center;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 20px 28px 16px;
+  min-width: 160px;
+}
+
+.ticket-number-title {
+  font-size: 10px; font-weight: 700;
+  color: #94a3b8; letter-spacing: 1.4px;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+
+.ticket-number-digits {
+  font-size: 52px; font-weight: 900;
+  color: #2563eb; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 14px;
+  animation: numberPop 0.4s ease-out both;
+}
+
+.ticket-cancel-btn {
+  width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 7px 12px;
+  border: 1px solid #fca5a5; border-radius: 8px;
+  background: transparent; color: #dc2626;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.ticket-cancel-btn:hover { background: #fef2f2; border-color: #dc2626; }
+
+@media (max-width: 580px) {
+  .ticket-wrapper { flex-direction: column; }
+  .ticket-number-display { width: 100%; }
+}

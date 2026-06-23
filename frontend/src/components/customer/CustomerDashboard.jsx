@@ -1,270 +1,172 @@
 import { useEffect, useState } from "react";
-import { getServices, createQueue } from "../../services/queue.service";
+import { getServices, createQueue, getMyQueue, cancelQueue } from "../../services/queue.service";
+import Navbar from "../common/Navbar";
+import Footer from "../common/Footer";
+import ActiveTicket from "./ActiveTicket";
+import ServiceList from "./ServiceList";
+import Loading from "../common/Loading";
+import Profile from "./Profile";
+import "./CustomerDashboard.css";
 
 const CustomerDashboard = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showMenu, setShowMenu] = useState(false);
+  const [currentQueue, setCurrentQueue] = useState(null);
+  const [activeView, setActiveView] = useState("dashboard");
 
-  // 👇 lấy user từ localStorage
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  // lấy user từ localStorage dưới dạng state để tự động cập nhật
+  const [currentUser, setCurrentUser] = useState(() => 
+    JSON.parse(localStorage.getItem("user") || "{}")
+  );
 
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const res = await getServices(); // ✅ dùng service
-        setServices(Array.isArray(res.data) ? res.data : []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // lấy services
+      const resService = await getServices();
+      setServices(Array.isArray(resService.data) ? resService.data : []);
 
-    fetchServices();
-  }, []);
+      // lấy queue user
+      const resQueue = await getMyQueue();
+      setCurrentQueue(resQueue.data || null);
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+
+  const handleStorageChange = () => {
+    setCurrentUser(JSON.parse(localStorage.getItem("user") || "{}"));
+  };
+
+  window.addEventListener("storage", handleStorageChange);
+
+  return () => {
+    window.removeEventListener("storage", handleStorageChange);
+  };
+}, []);
 
   const handleCreateQueue = async (serviceId) => {
-  try {
-    const res = await createQueue(serviceId);
+    if (currentQueue) {
+      alert("⚠️ Bạn đang có một vé xếp hàng hoạt động. Vui lòng hoàn thành hoặc huỷ vé hiện tại trước khi đăng ký vé mới.");
+      return;
+    }
 
-    console.log(res.data);
+    try {
+      const res = await createQueue(serviceId);
+      const queueData = res.data;
 
-    // 👉 lưu lại queue để dùng sau
-    localStorage.setItem("currentQueue", JSON.stringify(res.data));
+      // Lưu lại queue để dùng sau
+      setCurrentQueue(queueData);
 
-    // 👉 hiển thị số thứ tự
-    alert(`🎟 Your queue number is: ${res.data.number}`);
-    
-  } catch (err) {
-    console.error(err);
-    alert("❌ Failed to create queue");
+      // Hiển thị số thứ tự
+      alert(`🎟️ Lấy vé thành công! Số thứ tự của bạn là: ${queueData.number}`);
+    } catch (err) {
+      console.error(err);
+      alert("❌ Lấy vé thất bại. Vui lòng thử lại sau.");
+    }
+  };
+
+  const handleCancelQueue = async () => {
+  if (!currentQueue) return;
+
+  if (window.confirm("Bạn có chắc muốn huỷ vé không?")) {
+    try {
+      await cancelQueue(currentQueue._id);
+      setCurrentQueue(null);
+    } catch (err) {
+      console.error(err);
+      alert("❌ Huỷ vé thất bại");
+    }
   }
-};
 
-const handleLogout = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
+  };
 
-  window.location.href = "/"; // hoặc navigate("/")
-};
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.clear(); // 🔥 xoá sạch
+    window.location.href = "/";
+  };
+
+  // Lấy thông tin dịch vụ của vé đang chọn
+  const getActiveQueueService = () => {
+    if (!currentQueue) return null;
+    return services.find((s) => s._id === currentQueue.serviceId);
+  };
+
+  const activeService = getActiveQueueService();
+
+  // Danh sách các mục menu trên Navbar
+  const navItems = [
+    { label: "Home", active: activeView === "dashboard", onClick: () => setActiveView("dashboard") },
+    { label: "Services", active: false, onClick: () => setActiveView("dashboard") },
+    { label: "Track Queue", active: false, onClick: () => setActiveView("dashboard") },
+    { label: "Feedback", active: false, onClick: () => {} }
+  ];
 
   return (
-    <div style={styles.page}>
-      
-      {/* HEADER NAV */}
-      <header style={styles.header}>
-        <h2 style={styles.logo}>SMART QUEUE</h2>
+    <div className="dashboard-container">
+      {/* REUSABLE NAVBAR */}
+      <Navbar 
+        logoText="SMART QUEUE" 
+        user={currentUser} 
+        onLogout={handleLogout} 
+        onProfileClick={() => setActiveView("profile")}
+        navItems={navItems} 
+      />
 
-        <nav style={styles.nav}>
-          <span style={styles.active}>Home</span>
-          <span>Services</span>
-          <span>Track Queue</span>
-          <span>Feedback</span>
-        </nav>
-
-        {/* 👇 USER LOGIN */}
-<div style={{ position: "relative" }}>
-  <div 
-    style={styles.userBox}
-    onClick={() => setShowMenu(!showMenu)}
-  >
-    👤 {user?.fullName || "User"}
-  </div>
-
-  {showMenu && (
-    <div style={styles.dropdown}>
-      <p style={styles.dropdownName}>
-        {user?.fullName}
-      </p>
-
-      <button style={styles.logoutBtn} onClick={handleLogout}>
-        Logout
-      </button>
-    </div>
-  )}
-</div>
-      </header>
-
-      {/* MAIN */}
-      <main style={styles.main}>
-        <h1 style={styles.title}>Select a Service</h1>
-        <p style={styles.subtitle}>
-          Choose a service to get a queue number
-        </p>
-
-        {loading ? (
-          <p>Loading...</p>
+      {/* MAIN CONTENT */}
+      <main className="dashboard-main">
+        {activeView === "profile" ? (
+          <Profile onBack={() => setActiveView("dashboard")} />
         ) : (
-          <div style={styles.grid}>
-            {services.map((s, index) => (
-              <div
-                key={s._id}
-                style={styles.card}
-                onClick={() => handleCreateQueue(s._id)}
-              >
-                
-                {/* ICON (fake icon đơn giản) */}
-                <div style={styles.icon}>
-                  {getIcon(index)}
-                </div>
+          <>
+            {/* HERO */}
+            <section className="hero-banner">
+              <h1 className="hero-title">
+                Xin chào, <span className="hero-highlight">{currentUser?.fullName || "bạn"}</span>! 
+              </h1>
+              <p className="hero-subtitle">
+                Hệ thống đặt lịch xếp hàng trực tuyến tiện lợi. Chọn một dịch vụ dưới đây để bắt đầu lấy vé thứ tự của bạn.
+              </p>
+            </section>
 
-                <h3>{s.name}</h3>
+            {/* ACTIVE TICKET (Spotlight Card) */}
+            <ActiveTicket 
+              queue={currentQueue} 
+              service={activeService} 
+              onCancel={handleCancelQueue} 
+            />
 
-                <p style={styles.desc}>{s.description}</p>
-
-                <p style={styles.time}>
-                  Est. wait time <br />
-                  <b>{s.estimatedTime} - {s.estimatedTime + 5} min</b>
-                </p>
-
+            {/* SERVICES LIST */}
+            <section className="services-section">
+              <div className="services-list-header">
+                <h2 className="services-list-title">
+                  <i className="ti ti-grid-dots" style={{ color: "#2563eb" }}></i>
+                  Chọn dịch vụ cần giao dịch
+                </h2>
+                <p className="services-list-subtitle">Nhấn lấy số để đăng ký số thứ tự tự động</p>
               </div>
-            ))}
-          </div>
+
+              {loading ? (
+                <Loading type="spinner" message="Đang tải danh sách dịch vụ..." />
+              ) : (
+                <ServiceList services={services} onBook={handleCreateQueue} />
+              )}
+            </section>
+          </>
         )}
       </main>
 
-      {/* FOOTER */}
-      <footer style={styles.footer}>
-        © {new Date().getFullYear()} Smart Queue System
-      </footer>
+      {/* REUSABLE FOOTER */}
+      <Footer />
     </div>
   );
 };
 
 export default CustomerDashboard;
-
-// 👇 đặt ở dưới cùng file
-function getIcon(index) {
-  const icons = ["🏦", "➕", "🎧", "📄", "🛡", "💻"];
-  return icons[index % icons.length];
-}
-
-
-/* ================= STYLE ================= */
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#f3f4f6",
-    fontFamily: "Arial"
-  },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "16px 40px",
-    background: "white",
-    borderBottom: "1px solid #e5e7eb"
-  },
-
-  dropdown: {
-  position: "absolute",
-  top: "45px",
-  right: 0,
-  background: "white",
-  border: "1px solid #e5e7eb",
-  borderRadius: "8px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-  padding: "10px",
-  width: "150px",
-  zIndex: 1000
-},
-
-dropdownName: {
-  margin: "0 0 10px 0",
-  fontWeight: "bold",
-  fontSize: "14px"
-},
-
-logoutBtn: {
-  width: "100%",
-  padding: "6px",
-  border: "none",
-  background: "#ef4444",
-  color: "white",
-  borderRadius: "6px",
-  cursor: "pointer"
-},
-
-  logo: {
-    color: "#2563eb",
-    margin: 0
-  },
-
-  nav: {
-    display: "flex",
-    gap: "20px",
-    fontSize: "14px",
-    color: "#374151"
-  },
-
-  active: {
-    color: "#2563eb",
-    borderBottom: "2px solid #2563eb",
-    paddingBottom: "4px"
-  },
-
-  userBox: {
-    border: "1px solid #2563eb",
-    padding: "6px 12px",
-    borderRadius: "8px",
-    color: "#2563eb",
-    fontSize: "14px"
-  },
-
-  main: {
-    textAlign: "center",
-    padding: "40px 60px"
-  },
-
-  title: {
-    marginBottom: "10px"
-  },
-
-  subtitle: {
-    color: "#6b7280",
-    marginBottom: "30px"
-  },
-
-grid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-  gap: "24px"
-},
-
-  card: {
-    background: "white",
-    padding: "20px",
-    borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    textAlign: "center",
-    transition: "0.2s",
-    cursor: "pointer"
-  },
-
-  icon: {
-    fontSize: "30px",
-    marginBottom: "10px"
-  },
-
-  desc: {
-    fontSize: "13px",
-    color: "#6b7280",
-    margin: "10px 0"
-  },
-
-  time: {
-    fontSize: "13px",
-    color: "#10b981"
-  },
-
-  footer: {
-    marginTop: "40px",
-    textAlign: "center",
-    padding: "10px",
-    fontSize: "13px",
-    color: "#6b7280"
-  }
-};

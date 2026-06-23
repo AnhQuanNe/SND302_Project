@@ -4,6 +4,8 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 
+import UserManagement from "./pages/AdminPages/UserManagement";
+import ServiceManagement from "./pages/AdminPages/ServiceManagement";
 import CustomerDashboard from "./pages/CustomerPages/Dashboard";
 import StaffDashboard from "./pages/StaffPages/Dashboard";
 
@@ -86,6 +88,15 @@ function App() {
             }
           />
         </Route>
+
+        <Route
+          path="/admin/services"
+          element={
+            <ProtectedRoute role="admin">
+              <ServiceManagement />
+            </ProtectedRoute>
+          }
+        />
 
       </Routes>
     </BrowserRouter>

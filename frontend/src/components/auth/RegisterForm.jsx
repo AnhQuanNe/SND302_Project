@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {register} from "../../services/auth.service.js"
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import authService from "../../services/auth.service";
 
 function RegisterForm() {
   const navigate = useNavigate();
@@ -11,6 +10,9 @@ function RegisterForm() {
     email: "",
     password: "",
     confirmPassword: "",
+    phone: "",
+    gender: "",
+    dob: "",
   });
 
   const [error, setError] = useState("");
@@ -42,17 +44,20 @@ function RegisterForm() {
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
+        phone: formData.phone,
+        gender: formData.gender,
+        dob: formData.dob,
       });
 
       alert("Verification code has been sent to your email");
-      
+
       navigate("/verify-email", {
-        state: {email: formData.email}
+        state: { email: formData.email }
       });
     } catch (error) {
       setError(
         error.response?.data?.message ||
-          "Register failed. Please try again."
+        "Register failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -103,23 +108,76 @@ function RegisterForm() {
           }}
         />
 
-        <div style={{ position: "relative" }}>
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            style={{
-              width: "100%",
-              padding: "14px 16px",
-              border: "1px solid #e2e8f0",
-              borderRadius: "8px",
-              fontSize: "16px",
-              outline: "none",
-            }}
-          />
+        <input
+          type="text"
+          name="phone"
+          placeholder="Phone Number"
+          value={formData.phone}
+          onChange={handleChange}
+          required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
+        />
+
+        <select
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
+        >
+          <option value="">Chọn giới tính</option>
+          <option value="Nam">Nam</option>
+          <option value="Nữ">Nữ</option>
+          <option value="Khác">Khác</option>
+        </select>
+
+        <input
+          type="date"
+          name="dob"
+          placeholder="Date of Birth"
+          value={formData.dob}
+          onChange={handleChange}
+          required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
+        />
 
           <span
             onClick={() => setShowPassword(!showPassword)}
@@ -135,7 +193,6 @@ function RegisterForm() {
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
-        </div>
 
         <div style={{ position: "relative" }}>
           <input

@@ -36,7 +36,7 @@ export const login = async (req, res) => {
       });
     }
 
-    if (!user.verified){
+    if (!user.verified) {
       return res.status(401).json({
         message: "Please verify your email first!!!"
       })
@@ -82,7 +82,7 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
   try {
-    const { fullName, email, password, role } = req.body;
+    const { fullName, email, password, role, phone, gender, dob } = req.body;
 
     const normalizedEmail = email.toLowerCase().trim(); //Tranh loi "User Not Found";
     const existedUser = await User.findOne({
@@ -101,7 +101,7 @@ export const register = async (req, res) => {
     };
 
     const allowedRoles = ["customer", "staff"];
-    if (role && !allowedRoles.includes(role)){
+    if (role && !allowedRoles.includes(role)) {
       return res.status(400).json({
         message: "Invalid Role"
       })
@@ -116,6 +116,9 @@ export const register = async (req, res) => {
       fullName,
       email: normalizedEmail,
       password: hashedPassword,
+      phone,
+      gender,
+      dob,
       verificationCode,
       verificationExpiry: Date.now() + 10 * 60 * 1000,
       verified: false, //Chua verified,
@@ -174,14 +177,14 @@ export const resendOTP = async (req, res) => {
       // return res.status(500).json({ message: "Không thể gửi email. Vui lòng kiểm tra cấu hình Gmail" });
     }
 
-    res.status(200).json({ 
-      message: "New OTP has been sent to your email" 
+    res.status(200).json({
+      message: "New OTP has been sent to your email"
     });
 
   } catch (error) {
     console.error("❌ Resend OTP Error:", error);
-    res.status(500).json({ 
-      message: "Không thể gửi lại OTP. Vui lòng thử lại sau." 
+    res.status(500).json({
+      message: "Không thể gửi lại OTP. Vui lòng thử lại sau."
     });
   }
 };
