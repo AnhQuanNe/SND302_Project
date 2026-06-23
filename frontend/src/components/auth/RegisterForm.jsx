@@ -10,6 +10,9 @@ function RegisterForm() {
     email: "",
     password: "",
     confirmPassword: "",
+    phone: "",
+    gender: "",
+    dob: "",
   });
 
   const [error, setError] = useState("");
@@ -39,6 +42,9 @@ function RegisterForm() {
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
+        phone: formData.phone,
+        gender: formData.gender,
+        dob: formData.dob,
       });
 
       alert("Verification code has been sent to your email");
@@ -88,6 +94,60 @@ function RegisterForm() {
           name="email"
           placeholder="Email"
           value={formData.email}
+          onChange={handleChange}
+          required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
+        />
+
+        <input
+          type="text"
+          name="phone"
+          placeholder="Phone Number"
+          value={formData.phone}
+          onChange={handleChange}
+          required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
+        />
+
+        <select
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          required
+          style={{
+            width: "100%",
+            padding: "14px 16px",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            fontSize: "16px",
+            outline: "none",
+          }}
+        >
+          <option value="">Chọn giới tính</option>
+          <option value="Nam">Nam</option>
+          <option value="Nữ">Nữ</option>
+          <option value="Khác">Khác</option>
+        </select>
+
+        <input
+          type="date"
+          name="dob"
+          placeholder="Date of Birth"
+          value={formData.dob}
           onChange={handleChange}
           required
           style={{

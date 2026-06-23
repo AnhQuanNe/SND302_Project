@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getServices, createQueue } from "../../services/queue.service";
+import { getServices, createQueue, getMyQueue, cancelQueue } from "../../services/queue.service";
 import Navbar from "../common/Navbar";
 import Footer from "../common/Footer";
 import ActiveTicket from "./ActiveTicket";
@@ -19,39 +19,36 @@ const CustomerDashboard = () => {
     JSON.parse(localStorage.getItem("user") || "{}")
   );
 
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const res = await getServices();
-        setServices(Array.isArray(res.data) ? res.data : []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // lấy services
+      const resService = await getServices();
+      setServices(Array.isArray(resService.data) ? resService.data : []);
 
-    fetchServices();
+      // lấy queue user
+      const resQueue = await getMyQueue();
+      setCurrentQueue(resQueue.data || null);
 
-    // Check if there is an active queue ticket saved locally
-    const savedQueue = localStorage.getItem("currentQueue");
-    if (savedQueue) {
-      try {
-        setCurrentQueue(JSON.parse(savedQueue));
-      } catch (e) {
-        console.error(e);
-      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Lắng nghe thay đổi của localStorage (bao gồm custom event từ trang profile)
-    const handleStorageChange = () => {
-      setCurrentUser(JSON.parse(localStorage.getItem("user") || "{}"));
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
+  fetchData();
+
+  const handleStorageChange = () => {
+    setCurrentUser(JSON.parse(localStorage.getItem("user") || "{}"));
+  };
+
+  window.addEventListener("storage", handleStorageChange);
+
+  return () => {
+    window.removeEventListener("storage", handleStorageChange);
+  };
+}, []);
 
   const handleCreateQueue = async (serviceId) => {
     if (currentQueue) {
@@ -65,7 +62,6 @@ const CustomerDashboard = () => {
 
       // Lưu lại queue để dùng sau
       setCurrentQueue(queueData);
-      localStorage.setItem("currentQueue", JSON.stringify(queueData));
 
       // Hiển thị số thứ tự
       alert(`🎟️ Lấy vé thành công! Số thứ tự của bạn là: ${queueData.number}`);
@@ -75,16 +71,25 @@ const CustomerDashboard = () => {
     }
   };
 
-  const handleCancelQueue = () => {
-    if (window.confirm("Bạn có chắc chắn muốn huỷ vé xếp hàng hiện tại không?")) {
-      localStorage.removeItem("currentQueue");
+  const handleCancelQueue = async () => {
+  if (!currentQueue) return;
+
+  if (window.confirm("Bạn có chắc muốn huỷ vé không?")) {
+    try {
+      await cancelQueue(currentQueue._id);
       setCurrentQueue(null);
+    } catch (err) {
+      console.error(err);
+      alert("❌ Huỷ vé thất bại");
     }
+  }
+
   };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    localStorage.clear(); // 🔥 xoá sạch
     window.location.href = "/";
   };
 

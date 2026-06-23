@@ -82,7 +82,7 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
   try {
-    const { fullName, email, password, role } = req.body;
+    const { fullName, email, password, role, phone, gender, dob } = req.body;
 
     const normalizedEmail = email.toLowerCase().trim(); //Tranh loi "User Not Found";
     const existedUser = await User.findOne({
@@ -116,6 +116,9 @@ export const register = async (req, res) => {
       fullName,
       email: normalizedEmail,
       password: hashedPassword,
+      phone,
+      gender,
+      dob,
       verificationCode,
       verificationExpiry: Date.now() + 10 * 60 * 1000,
       verified: false, //Chua verified,
