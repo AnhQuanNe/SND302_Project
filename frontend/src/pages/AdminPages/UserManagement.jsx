@@ -17,6 +17,9 @@ import styles from "../../components/admin/UserManagement/UserManagement.module.
 export default function UserManagementPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [pagination, setPagination] = useState(null);
 
   /* =========================================
      STATE DỰ PHÒNG CHO VIỆC THÊM/SỬA
@@ -27,8 +30,9 @@ export default function UserManagementPage() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const res = await getUsers();
-      setUsers(res.data);
+      const res = await getUsers(page, limit);
+      setUsers(res.data.users);
+      setPagination(res.data.pagination);
     } catch (err) {
       console.log(err);
     } finally {
@@ -38,7 +42,7 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [page]);
 
   /* =========================================
      LOGIC DỰ PHÒNG CHO VIỆC THÊM/SỬA
@@ -62,18 +66,18 @@ export default function UserManagementPage() {
   // };
 
   const handleToggleLock = async (user) => {
-  try {
-    if (user.status === "inactive") {
-      await unlockUser(user._id);
-    } else {
-      await lockUser(user._id);
-    }
+    try {
+      if (user.status === "inactive") {
+        await unlockUser(user._id);
+      } else {
+        await lockUser(user._id);
+      }
 
-    loadUsers();
-  } catch (err) {
-    console.log(err);
-  }
-};
+      loadUsers();
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -93,11 +97,35 @@ export default function UserManagementPage() {
       {loading ? (
         <div>Đang tải dữ liệu...</div>
       ) : (
-        <UserTable 
-          users={users} 
-          // onEdit={handleEdit} (Đã comment)
+        <UserTable
+          users={users}
+          pagination={pagination}
           onToggleLock={handleToggleLock}
         />
+      )}
+      {pagination && (
+        <div className={styles.paginationContainer}>
+          <button
+            className={styles.pageBtn}
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            Trước
+          </button>
+
+          <span className={styles.pageText}>
+            Trang <strong>{pagination.currentPage}</strong> /{" "}
+            <strong>{pagination.totalPages}</strong>
+          </span>
+
+          <button
+            className={styles.pageBtn}
+            disabled={page >= pagination.totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            Sau
+          </button>
+        </div>
       )}
     </div>
   );
