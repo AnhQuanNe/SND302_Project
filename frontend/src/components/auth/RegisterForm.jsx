@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash }   from "react-icons/fa";
 import authService from "../../services/auth.service";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function RegisterForm() {
   const navigate = useNavigate();
@@ -42,7 +41,7 @@ function RegisterForm() {
     setLoading(true);
 
     try {
-      await register({
+      await authService.register({
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,

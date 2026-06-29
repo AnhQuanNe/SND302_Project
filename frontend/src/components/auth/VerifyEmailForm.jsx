@@ -76,7 +76,7 @@ function VerifyEmailForm() {
     try {
       console.log("🔍 Đang verify:", { email, code: verificationCode });
 
-      const res = await verifyEmail({
+      const res = await authService.verifyEmail({
         email,
         code: verificationCode
       });
@@ -121,7 +121,7 @@ function VerifyEmailForm() {
     setSuccess("");
 
     try {
-      const res = await resendOTP({ email });
+      const res = await authService.resendOTP({ email });
       setSuccess(res.message || "Mã OTP mới đã được gửi đến email của bạn!");
 
       // Reset countdown
