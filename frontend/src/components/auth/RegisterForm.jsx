@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash }   from "react-icons/fa";
 import authService from "../../services/auth.service";
 
 function RegisterForm() {
