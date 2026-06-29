@@ -4,8 +4,38 @@ import mongoose from "mongoose";
 
 // GET ALL
 export const getUsers = async (req, res) => {
-  const users = await User.find();
-  res.json(users);
+  try {
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
+    const skip = (page - 1) * limit;
+
+    const filterQuery = {};
+    if (req.query.roles) {
+      // Chuyển chuỗi "staff,admin" thành mảng ['staff', 'admin']
+      const rolesArray = req.query.roles.split(",");
+      // Dùng toán tử $in của MongoDB để tìm user có role nằm trong mảng
+      filterQuery.role = { $in: rolesArray,};
+    }
+
+    const [users, totalUsers] = await Promise.all([
+      User.find().skip(skip).limit(limit),
+      User.countDocuments(filterQuery),
+    ]);
+
+    res.json({
+      users,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalUsers / limit),
+        totalUsers,
+        limit,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 };
 
 // GET BY ID
@@ -83,17 +113,20 @@ export const lockUser = async (req, res) => {
       });
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { status: "inactive" },
-      { new: true }
-    );
+    const user = await User.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({
         message: "User not found",
       });
     }
+
+    if (user.role === "admin") {
+      return res.status(403).json({message: "Nghiệp vụ từ chối. Không thể khóa quản trị viên."});
+    }
+
+    user.status = "inactive";
+    await  user.save();
 
     res.json({
       message: "User locked successfully",
@@ -118,7 +151,7 @@ export const unlockUser = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { status: "active" },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     if (!user) {

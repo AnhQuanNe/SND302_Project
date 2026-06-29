@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./UserManagement.module.css";
 
-export default function UserTable({ users, onToggleLock }) {
+export default function UserTable({ users, pagination, onToggleLock }) {
   const getRoleClass = (role) => {
     if (role === "admin") return styles.roleAdmin;
     if (role === "staff") return styles.roleStaff;
@@ -16,79 +16,67 @@ export default function UserTable({ users, onToggleLock }) {
 
   return (
     <div className={styles.tableContainer}>
-      <div
-        className={styles.cardTitle}
-        style={{
-          padding: "1.25rem 1.75rem",
-          borderBottom: "1px solid #e5e5e5",
-          margin: 0,
-        }}
-      >
-        <h3 style={{ margin: 0 }}>Danh sách người dùng</h3>
-        <span className={styles.userCount}>{users.length} người dùng</span>
+      {/* Header của bảng */}
+      <div className={styles.cardHeader}>
+        <h3 className={styles.cardTitle}>Danh sách người dùng</h3>
+        <span className={styles.userCount}>
+          {pagination?.totalUsers ?? users.length} người dùng
+        </span>
       </div>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th className={styles.th} style={{ width: "28%" }}>
-              Họ tên
-            </th>
-            <th className={styles.th} style={{ width: "32%" }}>
-              Email
-            </th>
-            <th className={styles.th} style={{ width: "20%" }}>
-              Vai trò
-            </th>
-            <th
-              className={styles.th}
-              style={{ width: "20%", textAlign: "center" }}
-            >
-              Thao tác
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user._id}>
-              <td className={`${styles.td} ${styles.tdName}`}>
-                {user.fullName}
-              </td>
-              <td className={styles.td}>{user.email}</td>
-              <td className={styles.td}>
-                <span className={`${styles.badge} ${getRoleClass(user.role)}`}>
-                  {getRoleName(user.role)}
-                </span>
-              </td>
-              <td className={styles.td} style={{ textAlign: "center" }}>
-                {/* Nút Sửa đã được comment lại theo nghiệp vụ dự phòng */}
-                {/* <button 
-                  // onClick={() => onEdit(user)} 
-                  className={`${styles.btn} ${styles.btnSmall} ${styles.btnEdit}`}
-                >
-                  Sửa
-                </button> 
-                */}
-
-                <button
-                  onClick={() => onToggleLock(user)}
-                  className={`${styles.btn} ${styles.btnSmall} ${
-                    user.status === "inactive"
-                      ? styles.btnUnlock
-                      : styles.btnLock
-                  }`}
-                >
-                  {user.status === "inactive" ? "Mở khóa" : "Khóa"}
-                </button>
-              </td>
+      {/* Vùng chứa bảng có thể cuộn ngang nếu màn hình nhỏ */}
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th className={`${styles.th} ${styles.colName}`}>Họ tên</th>
+              <th className={`${styles.th} ${styles.colEmail}`}>Email</th>
+              <th className={`${styles.th} ${styles.colRole}`}>Vai trò</th>
+              <th className={`${styles.th} ${styles.colActions}`}>Thao tác</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user._id} className={styles.tableRow}>
+                <td className={`${styles.td} ${styles.tdName}`}>
+                  {user.fullName}
+                </td>
+                <td className={styles.td}>{user.email}</td>
+                <td className={styles.td}>
+                  <span className={`${styles.badge} ${getRoleClass(user.role)}`}>
+                    {getRoleName(user.role)}
+                  </span>
+                </td>
+                <td className={`${styles.td} ${styles.tdActions}`}>
+                  {user.role === "admin" ? (
+                    <span style={{color: "a0aec0", fontSize: "0.85rem", userSelect: "none"}}>
+                      -
+                    </span>
+                  ) :(
+                  <button
+                    onClick={() => onToggleLock(user)}
+                    className={`${styles.btn} ${
+                      user.status === "inactive"
+                        ? styles.btnUnlock
+                        : styles.btnLock
+                    }`}
+                  >
+                    {user.status === "inactive" ? "Mở khóa" : "Khóa"}
+                  </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      {users.length === 0 && (
-        <div className={styles.empty}>Chưa có người dùng nào</div>
-      )}
+        {/* Trạng thái trống */}
+        {users.length === 0 && (
+          <div className={styles.emptyState}>
+            Chưa có người dùng nào
+          </div>
+        )}
+      </div>
     </div>
   );
 }

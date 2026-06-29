@@ -1,174 +1,354 @@
+/* =========================================
+   1. LAYOUT CHUNG & FORM (Giữ nguyên)
+   ========================================= */
 .container {
   padding: 1.5rem;
-  font-family: sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   max-width: 1200px;
 }
 .pageTitle {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 600;
   margin: 0 0 2rem 0;
   color: #1e2937;
 }
 .card {
   background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  border: 0.5px solid #e8edf3;
+  border-radius: 14px;
   padding: 1.75rem;
   margin-bottom: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
-.cardTitle {
-  margin: 0 0 1.25rem 0;
-  font-size: 18px;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Form Styles */
 .formGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem;
 }
 .input {
-  padding: 12px 14px;
-  border: 1px solid #e2e8f0;
+  padding: 11px 14px;
+  border: 0.5px solid #d1d9e0;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
+  font-family: inherit;
   outline: none;
   background: #fff;
   width: 100%;
   box-sizing: border-box;
+  color: #1a202c;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .input:focus {
   border-color: #378add;
+  box-shadow: 0 0 0 3px rgba(55, 138, 221, 0.12);
 }
 .btnGroup {
   margin-top: 1.5rem;
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
-/* Button Styles */
-.btn {
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  font-size: 15px;
-  transition: 0.2s;
-}
+/* Nút ngoài bảng */
 .btnPrimary {
   background: #378add;
   color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s ease;
 }
-.btnPrimary:hover {
-  background: #286fb3;
-}
+.btnPrimary:hover { background: #286fb3; }
+
 .btnSecondary {
   background: #f1f5f9;
   color: #64748b;
-}
-.btnSecondary:hover {
-  background: #e2e8f0;
-}
-.btnSmall {
-  padding: 8px 18px;
-  border-radius: 6px;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
   font-size: 14px;
-  margin-right: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s ease;
 }
-.btnEdit {
-  background: #eab308;
-  color: white;
-}
+.btnSecondary:hover { background: #e2e8f0; }
+
 .btnDelete {
   background: #ef4444;
   color: white;
-  margin-right: 0;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
-/* Table Styles */
+/* =========================================
+   2. CONTAINER BẢNG
+   ========================================= */
 .tableContainer {
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 0.5px solid #e8edf3;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
-.userCount {
+
+/* =========================================
+   3. HEADER BẢNG
+   ========================================= */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 0.5px solid #e8edf3;
+  background: #fafbfc;
+}
+
+.cardTitle {
+  margin: 0;
   font-size: 15px;
-  color: #64748b;
-  font-weight: normal;
+  font-weight: 500;
+  color: #1a202c;
 }
+
+.userCount {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  background: #ffffff;
+  border: 0.5px solid #e2e8f0;
+  padding: 4px 12px;
+  border-radius: 9999px;
+}
+
+/* =========================================
+   4. VÙNG CUỘN & BẢNG
+   ========================================= */
+.tableWrapper {
+  overflow-x: auto;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
-}
-.th {
-  padding: 18px 20px;
   text-align: left;
-  font-weight: 600;
-  color: #1e2937;
-  border-bottom: 1px solid #e5e5e5;
-  background: #f8fafc;
 }
-.td {
-  padding: 18px 20px;
-  color: #475569;
-  border-bottom: 1px solid #f1f5f9;
-}
-.tdName {
+
+/* =========================================
+   5. HEADER CÁC CỘT
+   ========================================= */
+.th {
+  padding: 10px 16px;
+  font-size: 11px;
   font-weight: 500;
-  color: #1f2937;
-}
-.empty {
-  text-align: center;
-  padding: 3rem;
   color: #94a3b8;
+  background: #fafbfc;
+  border-bottom: 0.5px solid #e8edf3;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
 }
 
-/* Role Badges */
-.badge {
-  padding: 6px 16px;
-  border-radius: 9999px;
+.colName    { width: 30%; }
+.colEmail   { width: 32%; }
+.colRole    { width: 18%; }
+.colActions { width: 20%; text-align: center; }
+
+/* =========================================
+   6. CÁC HÀNG DỮ LIỆU
+   ========================================= */
+.tableRow {
+  border-bottom: 0.5px solid #f0f4f8;
+  transition: background 0.15s ease;
+}
+.tableRow:hover   { background: #f8fafc; }
+.tableRow:last-child { border-bottom: none; }
+
+.td {
+  padding: 12px 16px;
   font-size: 13.5px;
+  color: #2d3748;
+  vertical-align: middle;
+}
+
+/* =========================================
+   7. Ô TÊN: Avatar + tên + trạng thái
+   ========================================= */
+.tdName {
+  /* dùng flex trong JSX hoặc wrap thêm div.userCell nếu muốn avatar */
   font-weight: 500;
-  display: inline-block;
+  color: #1a202c;
 }
+
+/* Avatar (nếu bạn bọc thêm div.userCell + div.avatar trong JSX) */
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  flex-shrink: 0;
+  background: #E6F1FB;
+  color: #0C447C;
+}
+
+/* =========================================
+   8. BADGES VAI TRÒ
+   ========================================= */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  border: 0.5px solid transparent;
+}
+
 .roleAdmin {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #fff5f5;
+  color: #a32d2d;
+  border-color: #f09595;
 }
+
 .roleStaff {
-  background: #f1f5f9;
-  color: #475569;
+  background: #e6f1fb;
+  color: #185fa5;
+  border-color: #85b7eb;
 }
+
 .roleCustomer {
-  background: #f0fdf4;
-  color: #166534;
+  background: #eaf3de;
+  color: #3b6d11;
+  border-color: #97c459;
 }
 
+/* =========================================
+   9. NÚT HÀNH ĐỘNG TRONG BẢNG
+   ========================================= */
+.tdActions {
+  text-align: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: inherit;
+  border-radius: 9999px;
+  cursor: pointer;
+  border: 0.5px solid transparent;
+  transition: all 0.18s ease;
+  line-height: 1;
+}
+.btn:active { transform: scale(0.97); }
+
+/* Nút Khóa — đỏ nhạt, viền đỏ */
 .btnLock {
-  background: #ef4444;
-  color: white;
+  background: #fcebeb;
+  color: #a32d2d;
+  border-color: #f09595;
+}
+.btnLock:hover {
+  background: #f7c1c1;
+  border-color: #e24b4a;
 }
 
+/* Nút Mở khóa — xanh lá nhạt, viền xanh */
 .btnUnlock {
-  background: #22c55e;
-  color: white;
+  background: #eaf3de;
+  color: #3b6d11;
+  border-color: #97c459;
+}
+.btnUnlock:hover {
+  background: #c0dd97;
+  border-color: #639922;
 }
 
-.statusActive {
-  background: #dcfce7;
-  color: #166534;
+/* =========================================
+   10. TRẠNG THÁI TRỐNG
+   ========================================= */
+.emptyState {
+  padding: 3rem;
+  text-align: center;
+  color: #a0aec0;
+  font-size: 13.5px;
+  background: #fafbfc;
 }
 
-.statusInactive {
-  background: #fee2e2;
-  color: #991b1b;
+/* =========================================
+   11. PHÂN TRANG
+   ========================================= */
+.paginationContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 1.25rem;
+  padding: 0.25rem 0;
 }
+ 
+.pageBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #475569;
+  background: #ffffff;
+  border: 0.5px solid #d1d9e0;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  line-height: 1;
+}
+ 
+.pageBtn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+ 
+.pageBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+ 
+.pageBtn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+ 
+.pageText {
+  font-size: 13px;
+  color: #94a3b8;
+  min-width: 100px;
+  text-align: center;
+}
+ 
+.pageText strong {
+  color: #1e293b;
+  font-weight: 500;
+}
+ 
