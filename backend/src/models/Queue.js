@@ -13,6 +13,20 @@ const queueSchema = new mongoose.Schema({
     required: true,
   },
 
+  // Staff đang phục vụ
+  staffId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+
+  // Quầy đang phục vụ
+  counterId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Counter",
+    default: null,
+  },
+
   number: {
     type: Number,
     required: true,
@@ -23,6 +37,19 @@ const queueSchema = new mongoose.Schema({
     enum: ["waiting", "serving", "done", "cancelled"],
     default: "waiting",
   },
+
+  // Thời điểm nhân viên gọi số
+  calledAt: {
+    type: Date,
+    default: null,
+  },
+
+  // Thời điểm hoàn thành
+  finishedAt: {
+    type: Date,
+    default: null,
+  },
+
 }, {
   timestamps: true, // 🔥 nên có
 });

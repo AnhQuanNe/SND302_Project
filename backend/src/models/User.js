@@ -25,17 +25,23 @@ const userSchema = new mongoose.Schema(
     },
     // Status
     status: {
-        type: String,
-        enum: ["active", "inactive", "banned"],
-        default: "active"
+      type: String,
+      enum: ["active", "inactive", "banned"],
+      default: "active"
     },
     verified: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
-    verificationCode: String,
+    verificationCode: {
+      type: String,
+      default: null,
+    },
 
-    verificationExpiry: Date,
+    verificationExpiry: {
+      type: Date,
+      default: null,
+    },
 
     gender: {
       type: String,
@@ -53,7 +59,7 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-      timestamps: true,
+    timestamps: true,
   }
 );
 
