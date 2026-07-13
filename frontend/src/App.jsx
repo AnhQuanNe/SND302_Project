@@ -28,15 +28,22 @@ function App() {
         <Route
           path="/customer"
           element={
-           <ProtectedRoute role="customer">
-           <CustomerDashboard />
-           </ProtectedRoute>
-         }
+            <ProtectedRoute role="customer">
+              <CustomerDashboard />
+            </ProtectedRoute>
+          }
         />
-        
+
 
         {/* Staff */}
-        <Route path="/staff/dashboard" element={<StaffDashboard />} />
+        <Route
+          path="/staff/dashboard"
+          element={
+            <ProtectedRoute role="staff">
+              <StaffDashboard />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/admin"
@@ -49,7 +56,7 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
-          <Route path="feedback" element={<Feedback />}/>
+          <Route path="feedback" element={<Feedback />} />
           <Route
             path="queue"
             element={
@@ -102,7 +109,7 @@ function App() {
     </BrowserRouter>
   );
 
-  
+
 }
 
 export default App;

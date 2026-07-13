@@ -34,7 +34,7 @@ const queueSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ["waiting", "serving", "done", "cancelled"],
+    enum: ["waiting", "serving", "done", "cancelled", "skipped"],
     default: "waiting",
   },
 
