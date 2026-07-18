@@ -56,16 +56,14 @@ useEffect(() => {
       alert("⚠️ Bạn đang có một vé xếp hàng hoạt động. Vui lòng hoàn thành hoặc huỷ vé hiện tại trước khi đăng ký vé mới.");
       return;
     }
-
     try {
       const res = await createQueue(serviceId);
-      const queueData = res.data;
 
-      // Lưu lại queue để dùng sau
-      setCurrentQueue(queueData);
+      alert(`🎟️ Lấy vé thành công! Số thứ tự của bạn là: ${res.data.number}`);
+      // lấy lại queue đầy đủ
+      const queueRes = await getMyQueue();
 
-      // Hiển thị số thứ tự
-      alert(`🎟️ Lấy vé thành công! Số thứ tự của bạn là: ${queueData.number}`);
+      setCurrentQueue(queueRes.data);
     } catch (err) {
       console.error(err);
       alert("❌ Lấy vé thất bại. Vui lòng thử lại sau.");

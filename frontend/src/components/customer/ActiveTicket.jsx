@@ -38,8 +38,21 @@ const ActiveTicket = ({ queue, service, onCancel }) => {
 
           <div className="ticket-number-display">
             <div className="ticket-number-title">SỐ THỨ TỰ</div>
+              <div className="serving-box">
+                <span className="serving-label">
+                    Đang phục vụ
+                </span>
+                <span className="serving-number">
+                    {String(queue.currentServing || 0).padStart(3, "0")}
+                </span>
+            </div>
+            <div className="ticket-divider"></div>
             <div className="ticket-number-digits">
-              {String(queue.number).padStart(3, "0")}
+                {String(queue.number).padStart(3, "0")}
+            </div>
+            <div className="queue-progress">
+                <i className="ti ti-users"></i>
+                Còn <strong>{queue.peopleAhead}</strong> khách phía trước
             </div>
             <button className="ticket-cancel-btn" onClick={onCancel}>
               <i className="ti ti-square-x"></i>
