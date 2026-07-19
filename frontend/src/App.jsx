@@ -13,6 +13,7 @@ import StaffDashboard from "./pages/StaffPages/Dashboard";
 import AdminLayout from "./components/admin/Layout/AdminLayout";
 import AdminDashboard from "./pages/AdminPages/Dashboard";
 import AdminPlaceholderPage from "./pages/AdminPages/AdminPlaceholderPage";
+import CounterManagement from "./pages/AdminPages/CounterManagement";
 
 function App() {
   return (
@@ -69,12 +70,7 @@ function App() {
           <Route path="services" element={<ServiceManagement />} />
           <Route
             path="counters"
-            element={
-              <AdminPlaceholderPage
-                title="Quản lý Quầy phục vụ"
-                description="Danh sách quầy, trạng thái hoạt động và phân công nhân viên sẽ được hiển thị tại đây."
-              />
-            }
+            element={<CounterManagement />}
           />
           <Route
             path="reports"

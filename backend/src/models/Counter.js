@@ -4,12 +4,13 @@ const counterSchema = new mongoose.Schema({
   counterName: {
     type: String,
     required: true,
+    unique: true,
   },
 
   status: {
     type: String,
     enum: ["open", "closed"],
-    default: "open",
+    default: "closed",
   },
 
   // Nhân viên phụ trách quầy
@@ -18,6 +19,12 @@ const counterSchema = new mongoose.Schema({
     ref: "User",
     default: null,
   },
+
+  // trạng thái tồn tại của quầy
+  isActive: {
+    type: Boolean,
+    default: true
+  }
 },
   {
     timestamps: true,
