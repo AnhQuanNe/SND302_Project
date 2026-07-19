@@ -83,3 +83,106 @@ export const cancelQueue = async (req, res) => {
     });
   }
 };
+//PUT /api/queue/:id/serve
+export const serveQueue = async (req, res) => {
+
+    const queue = await Queue.findById(req.params.id);
+
+    if (!queue) {
+        return res.status(404).json({
+            message: "Queue not found"
+        });
+    }
+
+    queue.status = "serving";
+
+    // lưu thời điểm bắt đầu phục vụ
+    queue.servingAt = new Date();
+
+    await queue.save();
+
+    res.json(queue);
+
+}
+//PUT /api/queue/:id/done
+import QueueHistory from "../models/QueueHistory.js";
+import Service from "../models/Service.js";
+import Counter from "../models/Counter.js";
+import User from "../models/User.js";
+
+export const completeQueue = async (req, res) => {
+
+    const queue = await Queue.findById(req.params.id);
+
+    if (!queue) {
+        return res.status(404).json({
+            message: "Queue not found"
+        });
+    }
+
+    queue.status = "done";
+
+    await queue.save();
+
+    // ========= AI DATA =========
+
+    const service = await Service.findById(queue.serviceId);
+
+    const queueLength = await Queue.countDocuments({
+        serviceId: queue.serviceId
+    });
+
+    const staffCount = await User.countDocuments({
+        role: "staff"
+    });
+
+    const counterCount = await Counter.countDocuments();
+
+    const actualWaitTime =
+        (queue.updatedAt - queue.createdAt) / 60000;
+
+    const hour = queue.createdAt.getHours();
+
+    const day = queue.createdAt.getDay();
+
+    await QueueHistory.create({
+
+        queueId: queue._id,
+
+        serviceId: queue.serviceId,
+
+        userId: queue.userId,
+
+        queueNumber: queue.number,
+
+        queueLength,
+
+        averageServiceTime: service.averageServiceTime,
+
+        staffCount,
+
+        counterCount,
+
+        hourOfDay: hour,
+
+        dayOfWeek: day,
+
+        isPeakHour:
+            (hour >= 11 && hour <= 13) ||
+            (hour >= 17 && hour <= 19),
+
+        peakIntensity:
+            (hour >= 11 && hour <= 13) ||
+            (hour >= 17 && hour <= 19)
+                ? 1
+                : 0,
+
+        actualWaitTime
+
+    });
+
+    res.json({
+        message: "Completed"
+    });
+
+}
