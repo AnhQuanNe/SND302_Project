@@ -111,3 +111,46 @@
   .ticket-wrapper { flex-direction: column; }
   .ticket-number-display { width: 100%; }
 }
+
+.serving-box{
+    margin-bottom:18px;
+}
+
+.serving-label{
+    display:block;
+    font-size:11px;
+    text-transform:uppercase;
+    color:#94a3b8;
+    font-weight:700;
+    letter-spacing:1px;
+}
+
+.serving-number{
+    display:block;
+    margin-top:6px;
+    font-size:34px;
+    font-weight:800;
+    color:#16a34a;
+    animation:numberPop .4s ease;
+}
+
+.ticket-divider{
+    width:100%;
+    height:1px;
+    background:#e5e7eb;
+    margin-bottom:18px;
+}
+
+.queue-progress{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:8px 12px;
+    background:#eff6ff;
+    color:#2563eb;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:16px;
+}

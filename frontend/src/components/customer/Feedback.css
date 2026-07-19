@@ -1,0 +1,308 @@
+/* ============================================================
+   Feedback.css - SaaS Modern Upgrade
+   ============================================================ */
+
+/* ================= BASE ================= */
+
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: rgba(15, 23, 42, 0.08);
+}
+
+/* ================= PAGE ================= */
+
+.feedback-page {
+  min-height: 100vh;
+  padding: 50px 16px;
+  background: radial-gradient(circle at top, #eef2ff, #f8fafc 40%, #ffffff);
+  animation: fadeInPage 0.5s ease;
+}
+
+@keyframes fadeInPage {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================= CARD ================= */
+
+.feedback-card {
+  max-width: 920px;
+  margin: auto;
+
+  /* QUAN TRỌNG: giảm trắng */
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  border-radius: 24px;
+  padding: 42px;
+
+  box-shadow: none; /* bỏ shadow để không bị “tách layer” */
+
+  transition: all 0.3s ease;
+}
+
+.feedback-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 30px 80px rgba(15, 23, 42, 0.12);
+}
+
+/* ================= HEADER ================= */
+
+.feedback-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.feedback-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.feedback-subtitle {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+/* ================= FORM ================= */
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 14px 14px;
+
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+
+  font-size: 14px;
+
+  background: #fff;
+
+  transition: all 0.25s ease;
+
+  outline: none;
+}
+
+.form-group textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+/* ================= BUTTON ================= */
+
+.submit-btn {
+  width: 100%;
+  margin-top: 10px;
+
+  padding: 14px 18px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+
+  font-weight: 700;
+  font-size: 15px;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(37, 99, 235, 0.35);
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ================= STAR RATING ================= */
+
+.star-rating {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.star {
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.star:hover {
+  transform: scale(1.25) rotate(-5deg);
+}
+
+.rating-text {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: all 0.3s ease;
+}
+
+/* ================= FEEDBACK LIST ================= */
+
+.feedback-list {
+  margin-top: 35px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.feedback-list h2 {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+/* ITEM */
+
+.feedback-item {
+  background: #fff;
+
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+
+  padding: 16px 18px;
+  margin-bottom: 14px;
+
+  transition: all 0.25s ease;
+
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.feedback-item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(37, 99, 235, 0.2);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.feedback-item h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.feedback-item p {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+/* stars */
+
+.stars {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+/* ================= TOAST ================= */
+
+.toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+
+  padding: 14px 16px;
+  border-radius: 14px;
+
+  font-weight: 600;
+  font-size: 14px;
+
+  color: white;
+
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+
+  animation: toastIn 0.35s ease;
+  z-index: 9999;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast-success {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .feedback-card {
+    padding: 22px;
+  }
+
+  .feedback-title {
+    font-size: 24px;
+  }
+
+  .submit-btn {
+    font-size: 14px;
+  }
+}

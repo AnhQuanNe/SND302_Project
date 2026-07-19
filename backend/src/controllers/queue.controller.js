@@ -1,4 +1,5 @@
 import Queue from "../models/Queue.js";
+import mongoose from "mongoose";
 
 export const createQueue = async (req, res) => {
   try {
@@ -43,16 +44,48 @@ export const createQueue = async (req, res) => {
 export const getMyQueue = async (req, res) => {
   try {
     const userId = req.user.id;
-
     const queue = await Queue.findOne({
       userId,
-      status: { $in: ["waiting", "serving"] }
+      status: { $in: ["waiting", "serving"] },
     }).populate("serviceId");
 
-    res.json(queue);
+    if (!queue) {
+      return res.json(null);
+    }
+
+    // số đang phục vụ
+    let currentQueue = await Queue.findOne({
+        serviceId: queue.serviceId._id,
+        status: "serving",
+    }).sort({ number: -1 });
+
+    if (!currentQueue) {
+        currentQueue = await Queue.findOne({
+            serviceId: queue.serviceId._id,
+            status: "done",
+        }).sort({ number: -1 });
+    }
+
+    const currentServing = currentQueue
+        ? currentQueue.number
+        : 0;
+
+    const peopleAhead = await Queue.countDocuments({
+        serviceId: queue.serviceId._id,
+        status: "waiting",
+        number: { $lt: queue.number },
+    });
+
+    res.json({
+        ...queue.toObject(),
+        currentServing,
+        peopleAhead,
+    });
   } catch (err) {
+    console.error(err);
+
     res.status(500).json({
-      message: "Error fetching queue",
+      message: err.message,
     });
   }
 };

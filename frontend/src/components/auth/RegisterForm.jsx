@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash }   from "react-icons/fa";
 import authService from "../../services/auth.service";
 
 function RegisterForm() {
@@ -17,6 +18,8 @@ function RegisterForm() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -160,39 +163,76 @@ function RegisterForm() {
           }}
         />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          style={{
-            width: "100%",
-            padding: "14px 16px",
-            border: "1px solid #e2e8f0",
-            borderRadius: "8px",
-            fontSize: "16px",
-            outline: "none",
-          }}
-        />
+        <div style={{ position: "relative", width: "100%" }}>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              border: "1px solid #e2e8f0",
+              borderRadius: "8px",
+              fontSize: "16px",
+              outline: "none",
+            }}
+          />
 
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-          style={{
-            width: "100%",
-            padding: "14px 16px",
-            border: "1px solid #e2e8f0",
-            borderRadius: "8px",
-            fontSize: "16px",
-            outline: "none",
-          }}
-        />
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: "absolute",
+              right: "15px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              cursor: "pointer",
+              color: "#64748b",
+              userSelect: "none",
+            }}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
+
+        <div style={{ position: "relative" }}>
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              paddingRight: "45px",
+              border: "1px solid #e2e8f0",
+              borderRadius: "8px",
+              fontSize: "16px",
+              outline: "none",
+            }}
+          />
+
+          <span
+            onClick={() =>
+              setShowConfirmPassword(!showConfirmPassword)
+            }
+            style={{
+              position: "absolute",
+              right: "15px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              cursor: "pointer",
+              color: "#64748b",
+              userSelect: "none",
+            }}
+          >
+            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
 
         {error && (
           <div

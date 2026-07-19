@@ -1,0 +1,213 @@
+.assign-modal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.45);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:1000;
+
+}
+
+
+
+
+
+.assign-modal {
+
+
+    width:420px;
+
+    background:white;
+
+    padding:28px;
+
+    border-radius:16px;
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,0.2);
+
+}
+
+
+
+
+
+.assign-modal h3 {
+
+    margin-bottom:15px;
+
+    font-size:22px;
+
+    color:#111827;
+
+}
+
+
+
+
+
+.assign-counter-name {
+
+    margin-bottom:20px;
+
+    color:#4b5563;
+
+}
+
+
+
+
+
+.assign-counter-name strong {
+
+    color:#2563eb;
+
+}
+
+
+
+
+
+.assign-modal label {
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+    color:#374151;
+
+}
+
+
+
+
+
+.assign-modal select {
+
+
+    width:100%;
+
+    padding:12px 14px;
+
+    border-radius:8px;
+
+    border:1px solid #d1d5db;
+
+    outline:none;
+
+    font-size:14px;
+
+
+}
+
+
+
+
+
+.assign-modal select:focus {
+
+
+    border-color:#2563eb;
+
+
+}
+
+
+
+
+
+.assign-modal-actions {
+
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:12px;
+
+    margin-top:25px;
+
+
+}
+
+
+
+
+
+.assign-modal-actions button {
+
+
+    padding:10px 18px;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+
+}
+
+
+
+
+
+.assign-modal-actions button[type="button"] {
+
+
+    background:#e5e7eb;
+
+    color:#374151;
+
+
+}
+
+
+
+
+.assign-modal-actions button[type="button"]:hover {
+
+
+    background:#d1d5db;
+
+
+}
+
+
+
+
+
+
+.assign-modal-actions button[type="submit"] {
+
+
+    background:#2563eb;
+
+    color:white;
+
+
+}
+
+
+
+
+
+.assign-modal-actions button[type="submit"]:hover {
+
+
+    background:#1d4ed8;
+
+
+}

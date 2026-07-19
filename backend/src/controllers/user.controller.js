@@ -1,4 +1,8 @@
 import User from "../models/User.js";
+import {
+    getStaffList
+} from "../services/user.service.js";
+
 
 // Lấy thông tin cá nhân
 export const getProfile = async (req, res) => {
@@ -53,4 +57,28 @@ export const updateProfile = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+export const getAllStaff = async(req,res)=>{
+
+    try {
+
+        const staffs = await getStaffList();
+
+
+        return res.status(200).json({
+            success:true,
+            data:staffs
+        });
+
+
+    } catch(error){
+
+        return res.status(500).json({
+            success:false,
+            message:error.message
+        });
+
+    }
+
 };

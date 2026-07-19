@@ -16,6 +16,10 @@ export default function ProtectedRoute({ children, role }) {
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
 
+  console.log("TOKEN =", token);
+  console.log("USER =", user);
+  console.log("ROLE =", role);
+
   // chưa login
   if (!token) {
     return <Navigate to="/" />;
