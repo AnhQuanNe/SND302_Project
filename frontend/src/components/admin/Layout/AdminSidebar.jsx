@@ -39,16 +39,17 @@ export default function AdminSidebar() {
     <aside className={styles.sidebar}>
       {/* Brand Section */}
       <div className={styles.brand}>
-        <div className={styles.brandMark}>
-          <i className="ti-layers" /> 
-        </div>
-        <div className={styles.brandText}>
-          <h2 className={styles.logo}>
-            Admin<span className={styles.dot}></span>
-          </h2>
-          <p className={styles.tagline}>Queue System</p>
-        </div>
-      </div>
+    <div className={styles.brandMark}>
+      {/* Icon nhịp tim giống bên Customer */}
+      <i className="ti ti-activity-heartbeat" /> 
+    </div>
+    <div className={styles.brandText}>
+      <h2 className={styles.logo}>
+        Admin<span className={styles.dot}></span>
+      </h2>
+      <p className={styles.tagline}>Queue System</p>
+    </div>
+  </div>
 
       {/* Navigation Section */}
       <nav className={styles.nav}>

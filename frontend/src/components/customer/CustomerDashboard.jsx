@@ -153,7 +153,9 @@ const CustomerDashboard = () => {
         ) : activeView === "track" ? (
           /* --- MÀN HÌNH TRACK QUEUE RIÊNG BIỆT --- */
           <section className="track-queue-section">
-            <h2 style={{ marginBottom: "20px", color: "#2563eb" }}>Theo dõi vé của bạn</h2>
+            <h2 style={{ marginBottom: "20px", color: "#2563eb" }}>
+              Theo dõi vé của bạn
+            </h2>
 
             {currentQueue ? (
               <div className="active-queue-container">
@@ -175,7 +177,7 @@ const CustomerDashboard = () => {
               <div className="empty-queue-message">
                 <p>Bạn chưa có vé nào đang hoạt động.</p>
                 <button onClick={() => setActiveView("services")}>
-                  Đi tới Lấy vé
+                  Đi tới Lấy vé <i className="ti ti-arrow-right"></i>
                 </button>
               </div>
             )}
