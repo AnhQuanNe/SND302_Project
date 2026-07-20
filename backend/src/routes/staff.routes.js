@@ -8,6 +8,7 @@ import {
   updateCounter,
   getCounter,
   getSkippedQueuesList,
+  getHistory,
 } from "../controllers/staff.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 
@@ -43,4 +44,9 @@ router.route("/counter")
 // Route lấy danh sách hàng chờ đã skip
 router.route("/skipped")
   .get(protect, getSkippedQueuesList);
+
+// Route lấy lịch sử hàng chờ
+router.route("/history")
+  .get(protect, getHistory);
+  
 export default router;

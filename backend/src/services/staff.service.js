@@ -3,7 +3,7 @@ import Counter from "../models/Counter.js";
 import QueueHistory from "../models/QueueHistory.js";
 
 /**
- * Gọi khách tiếp theo
+ * Gọi khách tiếp theo (FIFO theo thời gian đến)
  * @param {String} staffId - ID của nhân viên đăng nhập
  */
 export const callNextQueue = async (staffId) => {
@@ -27,22 +27,28 @@ export const callNextQueue = async (staffId) => {
     throw new Error("Bạn đang phục vụ một khách khác.");
   }
 
-  // Lấy số nhỏ nhất đang chờ
-  const nextQueue = await Queue.findOne({
-    status: "waiting",
-  }).sort({ number: 1 });
+  // Lấy khách đến sớm nhất và cập nhật luôn trạng thái
+  const nextQueue = await Queue.findOneAndUpdate(
+    {
+      status: "waiting",
+    },
+    {
+      $set: {
+        status: "serving",
+        staffId,
+        counterId: counter._id,
+        calledAt: new Date(),
+      },
+    },
+    {
+      sort: { createdAt: 1 }, // FIFO
+      new: true,
+    }
+  );
 
   if (!nextQueue) {
     throw new Error("Không còn khách đang chờ.");
   }
-
-  // Cập nhật trạng thái
-  nextQueue.status = "serving";
-  nextQueue.staffId = staffId;
-  nextQueue.counterId = counter._id;
-  nextQueue.calledAt = new Date();
-
-  await nextQueue.save();
 
   // Trả về đầy đủ thông tin
   return await Queue.findById(nextQueue._id)
@@ -211,4 +217,18 @@ export const getSkippedQueues = async (staffId) => {
     .populate("userId", "fullName email")
     .populate("serviceId", "name estimatedTime")
     .sort({ updatedAt: -1 });
+};
+
+/**
+ * Lấy lịch sử xử lý queue của staff
+ * @param {String} staffId
+ */
+export const getQueueHistory = async (staffId) => {
+  return await QueueHistory.find({
+    staffId,
+  })
+    .populate("userId", "fullName email")
+    .populate("serviceId", "name")
+    .populate("counterId", "counterName")
+    .sort({ servedAt: -1 });
 };

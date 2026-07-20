@@ -1,0 +1,149 @@
+.queue-history {
+    margin-top: 25px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+    width: 100%;
+    overflow-x: auto;
+}
+
+
+.queue-history h3 {
+
+    margin-bottom: 20px;
+
+    font-size: 22px;
+    font-weight: 600;
+
+    color: #1f2937;
+
+    text-align: left;
+
+}
+
+
+/* Table */
+
+.queue-history table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 750px;
+
+}
+
+
+/* Header */
+
+.queue-history thead {
+
+    background-color: #2563eb;
+
+    color: white;
+
+}
+
+
+.queue-history th {
+
+    padding: 12px 15px;
+
+    text-align: center;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+}
+
+
+/* Body */
+
+.queue-history td {
+
+    padding: 12px 15px;
+
+    text-align: center;
+
+    font-size: 14px;
+
+    color: #374151;
+
+    border-bottom: 1px solid #e5e7eb;
+
+}
+
+
+
+/* Row hover */
+
+.queue-history tbody tr:hover {
+
+    background-color: #f3f4f6;
+
+}
+
+
+
+/* Queue number */
+
+.queue-history td:first-child {
+
+    font-weight: 700;
+
+    color: #2563eb;
+
+}
+
+
+
+/* Duration */
+
+.queue-history td:last-child {
+
+    font-weight: 600;
+
+    color: #059669;
+
+}
+
+
+
+/* Empty */
+
+.queue-history tbody tr td[colspan] {
+
+    text-align: center;
+
+    padding: 25px;
+
+    color: #6b7280;
+
+}
+
+
+
+/* Responsive */
+
+@media(max-width:768px){
+
+
+    .queue-history {
+
+        padding: 15px;
+
+    }
+
+
+    .queue-history h3 {
+
+        font-size:18px;
+
+    }
+
+
+}

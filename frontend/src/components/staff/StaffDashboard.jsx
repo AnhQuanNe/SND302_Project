@@ -14,6 +14,7 @@ import CounterCard from "./CounterCard";
 import CurrentQueue from "./CurrentQueue";
 import StaffActions from "./StaffActions";
 import SkippedQueueList from "./SkippedQueueList";
+import QueueHistory from "./QueueHistory"; // thêm
 
 import "./StaffDashboard.css";
 
@@ -22,6 +23,7 @@ const StaffDashboard = () => {
   const [currentQueue, setCurrentQueue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [skippedQueues, setSkippedQueues] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
   const [currentUser] = useState(
     JSON.parse(localStorage.getItem("user") || "{}")
   );
@@ -112,6 +114,32 @@ const StaffDashboard = () => {
           queues={skippedQueues}
           reload={loadData}
         />
+
+        {/* ===============================
+            Queue History
+        ================================ */}
+
+
+        <button
+          className="history-btn"
+          onClick={() => setShowHistory(!showHistory)}
+        >
+
+          {
+            showHistory
+              ? "Ẩn lịch sử xử lý"
+              : "Xem lịch sử xử lý"
+          }
+
+        </button>
+
+
+
+        {
+          showHistory && (
+            <QueueHistory />
+          )
+        }
 
       </div>
 

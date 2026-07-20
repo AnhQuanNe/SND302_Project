@@ -7,6 +7,7 @@ import {
   updateCounterStatus,
   getCounterInfo,
   getSkippedQueues,
+  getQueueHistory,
 } from "../services/staff.service.js";
 
 /**
@@ -181,6 +182,23 @@ export const getSkippedQueuesList = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getHistory = async (req, res) => {
+  try {
+    const history = await getQueueHistory(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      count: history.length,
+      data: history,
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
       message: error.message,
     });

@@ -126,7 +126,7 @@ const CustomerDashboard = () => {
     {
       label: "Services",
       active: false,
-      onClick: () => setActiveView("dashboard"),
+      onClick: () => setActiveView("services"),
     },
     {
       label: "Track Queue",
@@ -137,11 +137,7 @@ const CustomerDashboard = () => {
       label: "Feedback",
       active: activeView === "feedback",
       onClick: () => setActiveView("feedback"),
-    },
-    { label: "Home", active: activeView === "dashboard", onClick: () => setActiveView("dashboard") },
-    { label: "Services", active: activeView === "services", onClick: () => setActiveView("services") },
-    { label: "Track Queue", active: false, onClick: () => setActiveView("dashboard") },
-    { label: "Feedback", active: activeView === "feedback", onClick: () => setActiveView("feedback") }
+    }
   ];
 
   return (

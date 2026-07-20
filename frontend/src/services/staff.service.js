@@ -28,6 +28,9 @@ export const recallQueue = (queueId) =>
 export const getSkippedQueues = () =>
   API.get("/staff/skipped");
 
+// Lấy lịch sử phục vụ của staff
+export const getStaffHistory = () =>
+  API.get("/staff/history");
 
 // ==============================
 // Counter

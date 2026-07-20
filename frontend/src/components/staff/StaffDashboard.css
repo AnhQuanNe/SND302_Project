@@ -231,6 +231,59 @@
 
 }
 
+/* ===============================
+   Queue History Button
+================================ */
+
+.history-btn {
+
+    margin-top: 25px;
+
+    width: 220px;
+
+    padding: 12px 20px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+
+    display: block;
+
+    margin-left: auto;
+    margin-right: auto;
+
+}
+
+
+.history-btn:hover {
+
+    background: #1d4ed8;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 6px 12px rgba(37, 99, 235, 0.25);
+
+}
+
+
+.history-btn:active {
+
+    transform: translateY(0);
+
+}
+
 /* ========================= */
 
 @media(max-width:900px){
