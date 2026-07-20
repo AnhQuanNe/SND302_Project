@@ -235,6 +235,7 @@ export const resetStaffPassword = async (req, res) => {
       { 
         password: hashedPassword,
         // Có thể reset thêm trạng thái hoặc thu hồi vị trí ở đây nếu cần
+        passwordChangedAt: Date.now()
       },
       { new: true }
     );
