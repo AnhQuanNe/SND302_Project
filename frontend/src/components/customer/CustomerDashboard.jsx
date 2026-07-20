@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { getServices, createQueue, getMyQueue, cancelQueue } from "../../services/queue.service";
+import {
+  getServices,
+  createQueue,
+  getMyQueue,
+  cancelQueue,
+} from "../../services/queue.service";
 import Navbar from "../common/Navbar";
 import Footer from "../common/Footer";
 import ActiveTicket from "./ActiveTicket";
@@ -16,44 +21,45 @@ const CustomerDashboard = () => {
   const [activeView, setActiveView] = useState("dashboard");
 
   // lấy user từ localStorage dưới dạng state để tự động cập nhật
-  const [currentUser, setCurrentUser] = useState(() => 
-    JSON.parse(localStorage.getItem("user") || "{}")
+  const [currentUser, setCurrentUser] = useState(() =>
+    JSON.parse(localStorage.getItem("user") || "{}"),
   );
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // lấy services
-      const resService = await getServices();
-      setServices(Array.isArray(resService.data) ? resService.data : []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // lấy services
+        const resService = await getServices();
+        setServices(Array.isArray(resService.data) ? resService.data : []);
 
-      // lấy queue user
-      const resQueue = await getMyQueue();
-      setCurrentQueue(resQueue.data || null);
+        // lấy queue user
+        const resQueue = await getMyQueue();
+        setCurrentQueue(resQueue.data || null);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchData();
 
-  fetchData();
+    const handleStorageChange = () => {
+      setCurrentUser(JSON.parse(localStorage.getItem("user") || "{}"));
+    };
 
-  const handleStorageChange = () => {
-    setCurrentUser(JSON.parse(localStorage.getItem("user") || "{}"));
-  };
+    window.addEventListener("storage", handleStorageChange);
 
-  window.addEventListener("storage", handleStorageChange);
-
-  return () => {
-    window.removeEventListener("storage", handleStorageChange);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   const handleCreateQueue = async (serviceId) => {
     if (currentQueue) {
-      alert("⚠️ Bạn đang có một vé xếp hàng hoạt động. Vui lòng hoàn thành hoặc huỷ vé hiện tại trước khi đăng ký vé mới.");
+      alert(
+        "⚠️ Bạn đang có một vé xếp hàng hoạt động. Vui lòng hoàn thành hoặc huỷ vé hiện tại trước khi đăng ký vé mới.",
+      );
       return;
     }
     try {
@@ -71,18 +77,17 @@ useEffect(() => {
   };
 
   const handleCancelQueue = async () => {
-  if (!currentQueue) return;
+    if (!currentQueue) return;
 
-  if (window.confirm("Bạn có chắc muốn huỷ vé không?")) {
-    try {
-      await cancelQueue(currentQueue._id);
-      setCurrentQueue(null);
-    } catch (err) {
-      console.error(err);
-      alert("❌ Huỷ vé thất bại");
+    if (window.confirm("Bạn có chắc muốn huỷ vé không?")) {
+      try {
+        await cancelQueue(currentQueue._id);
+        setCurrentQueue(null);
+      } catch (err) {
+        console.error(err);
+        alert("❌ Huỷ vé thất bại");
+      }
     }
-  }
-
   };
 
   const handleLogout = () => {
@@ -94,29 +99,49 @@ useEffect(() => {
 
   // Lấy thông tin dịch vụ của vé đang chọn
   const getActiveQueueService = () => {
-    if (!currentQueue) return null;
-    return services.find((s) => s._id === currentQueue.serviceId);
+    if (!currentQueue || !services.length) return null;
+
+    // Ép kiểu về String để so sánh an toàn tuyệt đối
+    return services.find(
+      (s) => String(s._id) === String(currentQueue.serviceId),
+    );
   };
 
   const activeService = getActiveQueueService();
 
   // Danh sách các mục menu trên Navbar
   const navItems = [
-    { label: "Home", active: activeView === "dashboard", onClick: () => setActiveView("dashboard") },
-    { label: "Services", active: false, onClick: () => setActiveView("dashboard") },
-    { label: "Track Queue", active: false, onClick: () => setActiveView("dashboard") },
-    { label: "Feedback", active: activeView === "feedback", onClick: () => setActiveView("feedback") }
+    {
+      label: "Home",
+      active: activeView === "dashboard",
+      onClick: () => setActiveView("dashboard"),
+    },
+    {
+      label: "Services",
+      active: false,
+      onClick: () => setActiveView("dashboard"),
+    },
+    {
+      label: "Track Queue",
+      active: false,
+      onClick: () => setActiveView("track"),
+    },
+    {
+      label: "Feedback",
+      active: activeView === "feedback",
+      onClick: () => setActiveView("feedback"),
+    },
   ];
 
   return (
     <div className="dashboard-container">
       {/* REUSABLE NAVBAR */}
-      <Navbar 
-        logoText="SMART QUEUE" 
-        user={currentUser} 
-        onLogout={handleLogout} 
+      <Navbar
+        logoText="SMART QUEUE"
+        user={currentUser}
+        onLogout={handleLogout}
         onProfileClick={() => setActiveView("profile")}
-        navItems={navItems} 
+        navItems={navItems}
       />
 
       {/* MAIN CONTENT */}
@@ -125,9 +150,39 @@ useEffect(() => {
           <Profile onBack={() => setActiveView("dashboard")} />
         ) : activeView === "feedback" ? (
           <Feedback />
+        ) : activeView === "track" ? (
+          /* --- MÀN HÌNH TRACK QUEUE RIÊNG BIỆT --- */
+          <section className="track-queue-section">
+            <h2 style={{ marginBottom: "20px", color: "#2563eb" }}>Theo dõi vé của bạn</h2>
+
+            {currentQueue ? (
+              <div className="active-queue-container">
+                {/* Thêm phần hiển thị tên dịch vụ ở đây */}
+                <h3 style={{ marginBottom: "15px" }}>
+                  Dịch vụ đang chọn:{" "}
+                  {activeService?.name ||
+                    currentQueue?.serviceId?.name ||
+                    "Đang tải..."}
+                </h3>
+
+                <ActiveTicket
+                  queue={currentQueue}
+                  service={activeService}
+                  onCancel={handleCancelQueue}
+                />
+              </div>
+            ) : (
+              <div className="empty-queue-message">
+                <p>Bạn chưa có vé nào đang hoạt động.</p>
+                <button onClick={() => setActiveView("services")}>
+                  Đi tới Lấy vé
+                </button>
+              </div>
+            )}
+          </section>
         ) : (
+          /* --- MÀN HÌNH HOME TỔNG HỢP (activeView === "dashboard") --- */
           <>
-            {/* HERO */}
             <section className="hero-banner">
               <h1 className="hero-title">
                 Xin chào,{" "}
@@ -136,20 +191,21 @@ useEffect(() => {
                 </span>
                 !
               </h1>
-
               <p className="hero-subtitle">
-                Hệ thống đặt lịch xếp hàng trực tuyến tiện lợi. Chọn một dịch vụ dưới đây để bắt đầu lấy vé thứ tự của bạn.
+                Hệ thống đặt lịch xếp hàng trực tuyến tiện lợi. Chọn một dịch vụ
+                dưới đây để bắt đầu lấy vé thứ tự của bạn.
               </p>
             </section>
 
-            {/* ACTIVE TICKET */}
-            <ActiveTicket
-              queue={currentQueue}
-              service={activeService}
-              onCancel={handleCancelQueue}
-            />
+            {/* Chỉ hiện ActiveTicket ở Home nếu có vé */}
+            {currentQueue && (
+              <ActiveTicket
+                queue={currentQueue}
+                service={activeService}
+                onCancel={handleCancelQueue}
+              />
+            )}
 
-            {/* SERVICES LIST */}
             <section className="services-section">
               <div className="services-list-header">
                 <h2 className="services-list-title">
@@ -159,7 +215,6 @@ useEffect(() => {
                   ></i>
                   Chọn dịch vụ cần giao dịch
                 </h2>
-
                 <p className="services-list-subtitle">
                   Nhấn lấy số để đăng ký số thứ tự tự động
                 </p>
@@ -171,10 +226,7 @@ useEffect(() => {
                   message="Đang tải danh sách dịch vụ..."
                 />
               ) : (
-                <ServiceList
-                  services={services}
-                  onBook={handleCreateQueue}
-                />
+                <ServiceList services={services} onBook={handleCreateQueue} />
               )}
             </section>
           </>

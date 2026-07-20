@@ -12,17 +12,25 @@ const ActiveTicket = ({ queue, service, onCancel }) => {
           <div className="ticket-details">
             <div className="ticket-service-name">
               <i className="ti ti-bookmark" style={{ color: "#2563eb" }}></i>
-              {service ? service.name : "Dịch vụ đã chọn"}
+              Dịch vụ đã chọn:{" "}
+              {service?.name || queue?.serviceId?.name || "Đang tải..."}
             </div>
             <p className="ticket-description">
-              {service ? service.description : "Đang chờ xếp hàng tại quầy phục vụ"}
+              {service
+                ? service.description
+                : "Đang chờ xếp hàng tại quầy phục vụ"}
             </p>
 
             <div className="ticket-meta-grid">
               <div className="ticket-meta-col">
                 <span className="ticket-meta-label">Trạng thái</span>
-                <span className={`ticket-status-badge ${queue.status === "waiting" ? "status-waiting" : "status-serving"
-                  }`}>
+                <span
+                  className={`ticket-status-badge ${
+                    queue.status === "waiting"
+                      ? "status-waiting"
+                      : "status-serving"
+                  }`}
+                >
                   {queue.status === "waiting" ? "Đang chờ" : "Đang phục vụ"}
                 </span>
               </div>
@@ -30,7 +38,11 @@ const ActiveTicket = ({ queue, service, onCancel }) => {
               <div className="ticket-meta-col">
                 <span className="ticket-meta-label">Chờ ước tính</span>
                 <span className="ticket-wait-value">
-                  ⏱️ {service ? `${service.estimatedTime} - ${service.estimatedTime + 5}` : "5 - 10"} phút
+                  ⏱️{" "}
+                  {service
+                    ? `${service.estimatedTime} - ${service.estimatedTime + 5}`
+                    : "5 - 10"}{" "}
+                  phút
                 </span>
               </div>
             </div>
@@ -38,21 +50,19 @@ const ActiveTicket = ({ queue, service, onCancel }) => {
 
           <div className="ticket-number-display">
             <div className="ticket-number-title">SỐ THỨ TỰ</div>
-              <div className="serving-box">
-                <span className="serving-label">
-                    Đang phục vụ
-                </span>
-                <span className="serving-number">
-                    {String(queue.currentServing || 0).padStart(3, "0")}
-                </span>
+            <div className="serving-box">
+              <span className="serving-label">Đang phục vụ</span>
+              <span className="serving-number">
+                {String(queue.currentServing || 0).padStart(3, "0")}
+              </span>
             </div>
             <div className="ticket-divider"></div>
             <div className="ticket-number-digits">
-                {String(queue.number).padStart(3, "0")}
+              {String(queue.number).padStart(3, "0")}
             </div>
             <div className="queue-progress">
-                <i className="ti ti-users"></i>
-                Còn <strong>{queue.peopleAhead}</strong> khách phía trước
+              <i className="ti ti-users"></i>
+              Còn <strong>{queue.peopleAhead}</strong> khách phía trước
             </div>
             <button className="ticket-cancel-btn" onClick={onCancel}>
               <i className="ti ti-square-x"></i>
