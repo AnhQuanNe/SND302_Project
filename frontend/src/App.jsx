@@ -3,8 +3,10 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
-import Feedback from "./components/customer/Feedback";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
+import Feedback from "./components/customer/Feedback";
 import UserManagement from "./pages/AdminPages/UserManagement";
 import ServiceManagement from "./pages/AdminPages/ServiceManagement";
 import CustomerDashboard from "./pages/CustomerPages/Dashboard";
@@ -23,6 +25,8 @@ function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Customer */}
         <Route
