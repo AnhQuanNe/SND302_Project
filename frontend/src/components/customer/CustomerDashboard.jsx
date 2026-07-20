@@ -7,6 +7,7 @@ import ServiceList from "./ServiceList";
 import Loading from "../common/Loading";
 import Profile from "./Profile";
 import Feedback from "./Feedback";
+import ServicesCatalog from "./ServicesCatalog";
 import "./CustomerDashboard.css";
 
 const CustomerDashboard = () => {
@@ -66,7 +67,7 @@ useEffect(() => {
       setCurrentQueue(queueRes.data);
     } catch (err) {
       console.error(err);
-      alert("❌ Lấy vé thất bại. Vui lòng thử lại sau.");
+      alert(err.response?.data?.message || "❌ Lấy vé thất bại. Vui lòng thử lại sau.");
     }
   };
 
@@ -94,8 +95,12 @@ useEffect(() => {
 
   // Lấy thông tin dịch vụ của vé đang chọn
   const getActiveQueueService = () => {
-    if (!currentQueue) return null;
-    return services.find((s) => s._id === currentQueue.serviceId);
+    if (!currentQueue || !currentQueue.serviceId) return null;
+    if (typeof currentQueue.serviceId === "object" && currentQueue.serviceId.name) {
+      return currentQueue.serviceId;
+    }
+    const serviceIdStr = currentQueue.serviceId._id || currentQueue.serviceId;
+    return services.find((s) => s._id === serviceIdStr);
   };
 
   const activeService = getActiveQueueService();
@@ -103,7 +108,7 @@ useEffect(() => {
   // Danh sách các mục menu trên Navbar
   const navItems = [
     { label: "Home", active: activeView === "dashboard", onClick: () => setActiveView("dashboard") },
-    { label: "Services", active: false, onClick: () => setActiveView("dashboard") },
+    { label: "Services", active: activeView === "services", onClick: () => setActiveView("services") },
     { label: "Track Queue", active: false, onClick: () => setActiveView("dashboard") },
     { label: "Feedback", active: activeView === "feedback", onClick: () => setActiveView("feedback") }
   ];
@@ -125,6 +130,12 @@ useEffect(() => {
           <Profile onBack={() => setActiveView("dashboard")} />
         ) : activeView === "feedback" ? (
           <Feedback />
+        ) : activeView === "services" ? (
+          <ServicesCatalog 
+            services={services} 
+            onBook={handleCreateQueue} 
+            loading={loading} 
+          />
         ) : (
           <>
             {/* HERO */}

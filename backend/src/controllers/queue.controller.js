@@ -6,16 +6,15 @@ export const createQueue = async (req, res) => {
     const { serviceId } = req.body;
     const userId = req.user.id;
 
-    // ❗ Check user đã có queue chưa
+    // ❗ Kiểm tra xem user đã có vé nào đang chờ hoặc đang phục vụ trong hệ thống chưa
     const existingQueue = await Queue.findOne({
       userId,
-      serviceId,
-      status: "waiting",
+      status: { $in: ["waiting", "serving"] },
     });
 
     if (existingQueue) {
       return res.status(400).json({
-        message: "You already have a queue number",
+        message: "Bạn đã có một vé xếp hàng đang hoạt động. Vui lòng hoàn thành hoặc hủy vé hiện tại trước khi lấy vé mới!",
         queue: existingQueue,
       });
     }
@@ -49,9 +48,9 @@ export const getMyQueue = async (req, res) => {
       status: { $in: ["waiting", "serving"] },
     }).populate("serviceId");
 
-    if (!queue) {
-      return res.json(null);
-    }
+    if (!queue || !queue.serviceId) {
+  return res.json(null);
+}
 
     // số đang phục vụ
     let currentQueue = await Queue.findOne({
