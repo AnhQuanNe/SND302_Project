@@ -14,6 +14,7 @@ import CounterCard from "./CounterCard";
 import CurrentQueue from "./CurrentQueue";
 import StaffActions from "./StaffActions";
 import SkippedQueueList from "./SkippedQueueList";
+import Profile from "../../components/customer/Profile";
 
 import "./StaffDashboard.css";
 
@@ -22,6 +23,7 @@ const StaffDashboard = () => {
   const [currentQueue, setCurrentQueue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [skippedQueues, setSkippedQueues] = useState([]);
+  const [activeView, setActiveView] = useState("dashboard");
   const [currentUser] = useState(
     JSON.parse(localStorage.getItem("user") || "{}")
   );
@@ -86,34 +88,37 @@ const StaffDashboard = () => {
         logoText="SMART QUEUE"
         user={currentUser}
         onLogout={handleLogout}
+        onProfileClick={() => setActiveView("profile")}
       />
 
-      <div className="staff-dashboard">
+      {/* SỬA TẠI ĐÂY: Thêm điều kiện kiểm tra activeView */}
+      {activeView === "profile" ? (
+        // HIỂN THỊ TRANG PROFILE
+        <Profile onBack={() => setActiveView("dashboard")} />
+      ) : (
+        // HIỂN THỊ DASHBOARD BÌNH THƯỜNG KHI KHÔNG PHẢI LÀ PROFILE
+        <div className="staff-dashboard">
+          <h2 className="staff-title">
+            Staff Dashboard
+          </h2>
 
-        <h2 className="staff-title">
-          Staff Dashboard
-        </h2>
+          <div className="staff-top">
+            <CounterCard counter={counter} />
+            <CurrentQueue queue={currentQueue} />
+          </div>
 
-        <div className="staff-top">
+          <StaffActions
+            queue={currentQueue}
+            counter={counter}
+            reload={loadData}
+          />
 
-          <CounterCard counter={counter} />
-
-          <CurrentQueue queue={currentQueue} />
-
+          <SkippedQueueList
+            queues={skippedQueues}
+            reload={loadData}
+          />
         </div>
-
-        <StaffActions
-          queue={currentQueue}
-          counter={counter}
-          reload={loadData}
-        />
-
-        <SkippedQueueList
-          queues={skippedQueues}
-          reload={loadData}
-        />
-
-      </div>
+      )}
 
       <Footer />
     </>
