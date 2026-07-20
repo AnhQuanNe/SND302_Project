@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {FaEye, FaEyeSlash} from "react-icons/fa";
 import authService from "../../services/auth.service";
 
@@ -138,14 +138,36 @@ function LoginForm() {
         {loading ? "Đang đăng nhập..." : "Đăng nhập"}
       </button>
 
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px" }}>
-        <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          fontSize: "14px",
+        }}
+      >
+        <label
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            cursor: "pointer",
+          }}
+        >
           <input type="checkbox" style={{ accentColor: "#378ADD" }} />
           <span style={{ color: "#64748b" }}>Ghi nhớ tôi</span>
         </label>
-        <a href="#" style={{ color: "#378ADD", textDecoration: "none" }}>
+
+        <Link
+          to="/forgot-password"
+          style={{
+            color: "#378ADD",
+            textDecoration: "none",
+            fontWeight: 500,
+          }}
+        >
           Quên mật khẩu?
-        </a>
+        </Link>
       </div>
     </form>
   );

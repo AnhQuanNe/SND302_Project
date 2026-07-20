@@ -141,6 +141,105 @@ export const register = async (req, res) => {
   }
 };
 
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Sinh OTP mới
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+    user.verificationCode = verificationCode;
+    user.verificationExpiry = Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    // Gửi mail
+    await sendVerificationEmail(
+      user.email,
+      verificationCode
+    );
+
+    return res.status(200).json({
+      message: "OTP has been sent to your email",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Kiểm tra OTP
+    if (
+      !user.verificationCode ||
+      user.verificationCode !== otp.toString()
+    ) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    // Kiểm tra hết hạn
+    if (user.verificationExpiry < Date.now()) {
+      return res.status(400).json({
+        message: "OTP has expired",
+      });
+    }
+
+    // Hash mật khẩu mới
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Cập nhật
+    user.password = hashedPassword;
+
+    // Xóa OTP
+    user.verificationCode = undefined;
+    user.verificationExpiry = undefined;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Password reset successfully",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 // === RESEND OTP ===
 export const resendOTP = async (req, res) => {
   try {

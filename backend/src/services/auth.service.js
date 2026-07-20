@@ -1,4 +1,4 @@
-import api from "../api/api";
+import api from "../api/api.js";
 
 const register = async (data) => {
     const response = await api.post("/auth/register", data);
@@ -20,4 +20,15 @@ const resendOTP = async (data) => {
     return response.data;
 }
 
-export default {register, login, verifyEmail, resendOTP};
+const forgotPasswordService = async (data) => {
+    const response = await api.post("/auth/forgot-password", data);
+    return response.data;
+}
+
+// Đặt lại mật khẩu
+const resetPasswordService = async (data) => {
+    const response = await api.post("/auth/reset-password", data);
+    return response.data;
+}
+
+export default {register, login, verifyEmail, resendOTP, forgotPasswordService, resetPasswordService};

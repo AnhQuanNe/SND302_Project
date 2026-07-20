@@ -3,8 +3,10 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
-import Feedback from "./components/customer/Feedback";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
+import Feedback from "./components/customer/Feedback";
 import UserManagement from "./pages/AdminPages/UserManagement";
 import ServiceManagement from "./pages/AdminPages/ServiceManagement";
 import CustomerDashboard from "./pages/CustomerPages/Dashboard";
@@ -14,6 +16,7 @@ import AdminLayout from "./components/admin/Layout/AdminLayout";
 import AdminDashboard from "./pages/AdminPages/Dashboard";
 import AdminPlaceholderPage from "./pages/AdminPages/AdminPlaceholderPage";
 import CounterManagement from "./pages/AdminPages/CounterManagement";
+import QueueManagement from "./pages/AdminPages/QueueManagement";
 
 function App() {
   return (
@@ -24,6 +27,8 @@ function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Customer */}
         <Route
@@ -58,16 +63,11 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="feedback" element={<Feedback />} />
-          <Route
-            path="queue"
-            element={
-              <AdminPlaceholderPage
-                title="Quản lý Hàng đợi"
-                description="Theo dõi, lọc và điều phối hàng đợi sẽ được hiển thị tại đây."
-              />
-            }
-          />
           <Route path="services" element={<ServiceManagement />} />
+          <Route 
+              path="queue" 
+              element={<QueueManagement />} 
+          />
           <Route
             path="counters"
             element={<CounterManagement />}

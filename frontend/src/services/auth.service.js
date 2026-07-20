@@ -27,9 +27,21 @@ const verifyEmail = async (data) => {
   return response.data;
 };
 
+// Gửi OTP quên mật khẩu
+const forgotPassword = async (data) => {
+  const response = await API.post(`${BASE}/forgot-password`, data);
+  return response.data;
+};
+
+// Đặt lại mật khẩu
+const resetPassword = async (data) => {
+  const response = await API.post(`${BASE}/reset-password`, data);
+  return response.data;
+};
+
 const resendOTP = async (data) => {
   const response = await API.post(`${BASE}/resend-otp`, data);
   return response.data;
 };
 
-export default { register, login, verifyEmail, resendOTP };
+export default { register, login, verifyEmail, resendOTP, forgotPassword, resetPassword };
