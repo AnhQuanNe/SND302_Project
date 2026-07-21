@@ -1,6 +1,6 @@
 import API from "./api";
 
-export const getServices = () => API.get("/services");
+export const getServices = () => API.get("/services?isActive=true");
 
 export const createQueue = (serviceId) =>
   API.post("/queue", { serviceId });

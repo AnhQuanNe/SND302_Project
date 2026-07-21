@@ -6,15 +6,16 @@ export const createQueue = async (req, res) => {
     const { serviceId } = req.body;
     const userId = req.user.id;
 
-    // ❗ Kiểm tra xem user đã có vé nào đang chờ hoặc đang phục vụ trong hệ thống chưa
+    // ❗ Check user đã có queue chưa
     const existingQueue = await Queue.findOne({
       userId,
-      status: { $in: ["waiting", "serving"] },
+      serviceId,
+      status: "waiting",
     });
 
     if (existingQueue) {
       return res.status(400).json({
-        message: "Bạn đã có một vé xếp hàng đang hoạt động. Vui lòng hoàn thành hoặc hủy vé hiện tại trước khi lấy vé mới!",
+        message: "You already have a queue number",
         queue: existingQueue,
       });
     }
@@ -49,36 +50,36 @@ export const getMyQueue = async (req, res) => {
     }).populate("serviceId");
 
     if (!queue || !queue.serviceId) {
-  return res.json(null);
-}
+      return res.json(null);
+    }
 
     // số đang phục vụ
     let currentQueue = await Queue.findOne({
-        serviceId: queue.serviceId._id,
-        status: "serving",
+      serviceId: queue.serviceId._id,
+      status: "serving",
     }).sort({ number: -1 });
 
     if (!currentQueue) {
-        currentQueue = await Queue.findOne({
-            serviceId: queue.serviceId._id,
-            status: "done",
-        }).sort({ number: -1 });
+      currentQueue = await Queue.findOne({
+        serviceId: queue.serviceId._id,
+        status: "done",
+      }).sort({ number: -1 });
     }
 
     const currentServing = currentQueue
-        ? currentQueue.number
-        : 0;
+      ? currentQueue.number
+      : 0;
 
     const peopleAhead = await Queue.countDocuments({
-        serviceId: queue.serviceId._id,
-        status: "waiting",
-        number: { $lt: queue.number },
+      serviceId: queue.serviceId._id,
+      status: "waiting",
+      number: { $lt: queue.number },
     });
 
     res.json({
-        ...queue.toObject(),
-        currentServing,
-        peopleAhead,
+      ...queue.toObject(),
+      currentServing,
+      peopleAhead,
     });
   } catch (err) {
     console.error(err);
