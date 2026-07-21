@@ -16,17 +16,23 @@ import {
  */
 export const nextQueue = async (req, res) => {
   try {
-    // ID của staff lấy từ middleware xác thực
-    const staffId = req.user.id;
+    console.log("========== CALL NEXT ==========");
+    console.log("Staff:", req.user.id);
 
-    const queue = await callNextQueue(staffId);
+    const queue = await callNextQueue(req.user.id);
+
+    console.log("Queue:", queue);
 
     return res.status(200).json({
       success: true,
-      message: "Gọi khách tiếp theo thành công.",
       data: queue,
     });
+
   } catch (error) {
+    console.log("ERROR:");
+    console.log(error);
+    console.log(error.stack);
+
     return res.status(400).json({
       success: false,
       message: error.message,

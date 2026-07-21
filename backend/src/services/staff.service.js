@@ -1,31 +1,49 @@
 import Queue from "../models/Queue.js";
 import Counter from "../models/Counter.js";
 import QueueHistory from "../models/QueueHistory.js";
+import { getIO } from "../config/socket.js";
+import { createNotification } from "./notification.service.js";
+import Service from "../models/Service.js";
+import User from "../models/User.js";
 
 /**
  * Gọi khách tiếp theo (FIFO theo thời gian đến)
  * @param {String} staffId - ID của nhân viên đăng nhập
  */
 export const callNextQueue = async (staffId) => {
-  // Tìm quầy mà staff đang phụ trách
+  console.log("\n========== CALL NEXT ==========");
+  console.log("Staff:", staffId);
+
+  // Kiểm tra tất cả queue
+  const allQueues = await Queue.find().lean();
+  console.log("All Queues:");
+  console.log(allQueues);
+
+  // Kiểm tra queue waiting
+  const waitingQueues = await Queue.find({
+    status: "waiting",
+  }).lean();
+
+  console.log("Waiting Queues:");
+  console.log(waitingQueues);
+
+  // Kiểm tra counter
   const counter = await Counter.findOne({
     staffId,
     status: "open",
   });
 
-  if (!counter) {
-    throw new Error("Bạn chưa được phân công quầy hoặc quầy đang đóng.");
-  }
+  console.log("Counter:");
+  console.log(counter);
 
-  // Kiểm tra staff có đang phục vụ khách không
+  // Kiểm tra queue hiện tại của staff
   const currentQueue = await Queue.findOne({
     staffId,
     status: "serving",
   });
 
-  if (currentQueue) {
-    throw new Error("Bạn đang phục vụ một khách khác.");
-  }
+  console.log("Current Queue:");
+  console.log(currentQueue);
 
   // Lấy khách đến sớm nhất và cập nhật luôn trạng thái
   const nextQueue = await Queue.findOneAndUpdate(
@@ -46,11 +64,50 @@ export const callNextQueue = async (staffId) => {
     }
   );
 
+  console.log("Next Queue:");
+  console.log(nextQueue);
+
+  if (!counter) {
+    throw new Error("Bạn chưa được phân công quầy hoặc quầy đang đóng.");
+  }
+
+  if (currentQueue) {
+    throw new Error("Bạn đang phục vụ một khách khác.");
+  }
+
   if (!nextQueue) {
     throw new Error("Không còn khách đang chờ.");
   }
 
-  // Trả về đầy đủ thông tin
+  nextQueue.status = "serving";
+  nextQueue.staffId = staffId;
+  nextQueue.counterId = counter._id;
+  nextQueue.calledAt = new Date();
+
+  console.log("Before Save:");
+  console.log(nextQueue);
+
+  await nextQueue.save();
+  await createNotification({
+    userId: nextQueue.userId,
+    title: "Đến lượt giao dịch",
+    message: `Số ${nextQueue.number} đã được gọi.`,
+    type: "called",
+});
+  // ===== SOCKET.IO =====
+// Thông báo cho Customer biết đã đến lượt
+getIO().emit("queueCalled", {
+  queueId: nextQueue._id,
+  userId: nextQueue.userId.toString(),
+  number: nextQueue.number,
+  counterId: counter._id,
+});
+console.log("Emit queueCalled", {
+    userId: nextQueue.userId,
+    number: nextQueue.number
+});
+  console.log("Saved Successfully");
+
   return await Queue.findById(nextQueue._id)
     .populate("userId", "fullName email")
     .populate("serviceId")
@@ -80,25 +137,100 @@ export const completeQueue = async (queueId, staffId) => {
   queue.finishedAt = new Date();
 
   await queue.save();
+  await createNotification({
+    userId: queue.userId,
+    title: "Hoàn thành",
+    message: "Giao dịch của bạn đã hoàn tất.",
+    type: "completed",
+});
+  // ===== SOCKET.IO =====
+// Thông báo phục vụ hoàn tất
+const io = getIO();
 
+console.log("Socket connected:", io.engine.clientsCount);
+console.log("Emit completed to", io.engine.clientsCount, "clients");
+
+
+io.emit("queueCompleted", {
+  queueId: queue._id.toString(),
+  userId: queue.userId.toString(),
+  number: queue.number,
+});
+
+console.log("Emit queueCompleted");
+console.log("Emit queueCompleted", {
+    userId: queue.userId,
+    number: queue.number
+});
+const service = await Service.findById(queue.serviceId);
+
+const queueLength = await Queue.countDocuments({
+    serviceId: queue.serviceId,
+    status: "waiting"
+});
+
+const staffCount = await User.countDocuments({
+    role: "staff"
+});
+
+const counterCount = await Counter.countDocuments({
+    status: "open"
+});
+
+const hour = queue.createdAt.getHours();
+
+const day = queue.createdAt.getDay();
+
+const actualWaitTime =
+    (queue.calledAt - queue.createdAt) / 60000;
   // Lưu lịch sử
   await QueueHistory.create({
+
     queueId: queue._id,
     queueNumber: queue.number,
+
     userId: queue.userId,
     serviceId: queue.serviceId,
+
     counterId: queue.counterId,
     staffId: queue.staffId,
 
     servedAt: queue.finishedAt,
 
-    duration: Math.floor(
-      (queue.finishedAt - queue.calledAt) / 1000
-    ),
-  });
+    duration:
+        (queue.finishedAt - queue.calledAt) / 60000,
 
-  return queue;
-};
+    queueLength,
+
+    averageServiceTime:
+        service.estimatedTime,
+
+    staffCount,
+
+    counterCount,
+
+    hourOfDay: hour,
+
+    dayOfWeek: day,
+
+    isPeakHour:
+        (hour >= 11 && hour <= 13) ||
+        (hour >= 17 && hour <= 19),
+
+    peakIntensity:
+        (hour >= 11 && hour <= 13) ||
+        (hour >= 17 && hour <= 19)
+            ? 1
+            : 0,
+
+    actualWaitTime,
+
+    currentQueueCount: queueLength
+
+});
+return queue;
+
+}; 
 
 export const getCurrentQueue = async (staffId) => {
   const queue = await Queue.findOne({
@@ -142,7 +274,18 @@ export const skipQueue = async (queueId, staffId) => {
   queue.status = "skipped";
 
   await queue.save();
-
+  await createNotification({
+    userId: queue.userId,
+    title: "Đã bỏ qua",
+    message: "Số của bạn đã bị bỏ qua.",
+    type: "skipped",
+});
+  // ===== SOCKET.IO =====
+getIO().emit("queueSkipped", {
+  queueId: queue._id,
+  userId: queue.userId.toString(),
+  number: queue.number,
+});
   return queue;
 };
 
@@ -173,7 +316,18 @@ export const recallQueue = async (queueId, staffId) => {
   queue.calledAt = new Date();
 
   await queue.save();
-
+  await createNotification({
+    userId: queue.userId,
+    title: "Được gọi lại",
+    message: `Mời bạn quay lại quầy giao dịch.`,
+    type: "recalled",
+});
+// ===== SOCKET.IO =====
+getIO().emit("queueRecalled", {
+  queueId: queue._id,
+  userId: queue.userId.toString(),
+  number: queue.number,
+});
   return await Queue.findById(queue._id)
     .populate("userId", "fullName email")
     .populate("serviceId")
