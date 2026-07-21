@@ -97,6 +97,11 @@ if "serviceId" not in df.columns:
 
 df["serviceId"] = df["serviceId"].astype(str)
 
+
+print("\n========== SERVICE ID DEBUG ==========")
+print(df["serviceId"].head(20))
+print("Unique serviceId:", df["serviceId"].nunique())
+print(df["serviceId"].value_counts().head(20))
 # ===========================================
 # Clean Data
 # ===========================================
