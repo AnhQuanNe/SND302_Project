@@ -1,30 +1,30 @@
 import axios from "axios";
 
+const AI_URL =
+  process.env.AI_SERVICE_URL || "http://localhost:8000";
+
 export const predictWaitTime = async (body) => {
-    try {
+  try {
+    console.log("AI URL:", AI_URL);
+    console.log("SEND TO AI:", body);
 
-        console.log("SEND TO AI:");
-        console.log(body);
+    const res = await axios.post(`${AI_URL}/predict`, body, {
+      timeout: 30000,
+    });
 
-        const res = await axios.post(
-            "http://localhost:8000/predict",
-            body
-        );
+    console.log("AI RESPONSE:", res.data);
 
-        console.log("AI RESPONSE:");
-        console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.log("========== AI ERROR ==========");
+    console.log("Message:", err.message);
+    console.log("Code:", err.code);
+    console.log("URL:", err.config?.url);
+    console.log("Status:", err.response?.status);
+    console.log("Response:", err.response?.data);
 
-        return res.data;
-
-    } catch (err) {
-
-        console.log("AI ERROR");
-        console.log(err.response?.data);
-        console.log(err.response?.status);
-        console.log(err.message);
-
-        return {
-            predictedWaitTime: null
-        };
-    }
+    return {
+      predictedWaitTime: null,
+    };
+  }
 };
