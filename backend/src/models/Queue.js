@@ -21,66 +21,39 @@ const queueSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["waiting", "serving", "done", "cancelled"],
+      enum: ["waiting", "serving", "done", "cancelled", "skipped"],
       default: "waiting",
     },
 
-    // Thời điểm được gọi đến quầy
+    // Nhân viên đang phục vụ
+    staffId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    // Quầy đang phục vụ
+    counterId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Counter",
+      default: null,
+    },
+
+    // Thời điểm gọi khách
     calledAt: {
       type: Date,
       default: null,
     },
 
-    // Thời điểm bắt đầu phục vụ
-    servingAt: {
-      type: Date,
-      default: null,
-    },
-
     // Thời điểm hoàn thành
-    completedAt: {
+    finishedAt: {
       type: Date,
       default: null,
     },
-  // Staff đang phục vụ
-  staffId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    default: null,
   },
-
-  // Quầy đang phục vụ
-  counterId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Counter",
-    default: null,
-  },
-
-  number: {
-    type: Number,
-    required: true,
-  },
-
-  status: {
-    type: String,
-    enum: ["waiting", "serving", "done", "cancelled", "skipped"],
-    default: "waiting",
-  },
-
-  // Thời điểm nhân viên gọi số
-  calledAt: {
-    type: Date,
-    default: null,
-  },
-
-  // Thời điểm hoàn thành
-  finishedAt: {
-    type: Date,
-    default: null,
-  },
-
-}, {
-  timestamps: true, // 🔥 nên có
-});
+  {
+    timestamps: true,
+  }
+);
 
 export default mongoose.model("Queue", queueSchema);

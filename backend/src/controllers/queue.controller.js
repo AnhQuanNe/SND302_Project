@@ -1,6 +1,10 @@
 import Queue from "../models/Queue.js";
 import mongoose from "mongoose";
-
+import { predictWaitTime } from "../services/aiPrediction.service.js";
+import Service from "../models/Service.js";
+import User from "../models/User.js";
+import Counter from "../models/Counter.js";
+import QueueHistory from "../models/QueueHistory.js";
 export const createQueue = async (req, res) => {
   try {
     const { serviceId } = req.body;
@@ -31,8 +35,43 @@ export const createQueue = async (req, res) => {
       serviceId,
       number: nextNumber,
     });
+    const service = await Service.findById(serviceId);
 
-    res.status(201).json(newQueue);
+const waitingCount = await Queue.countDocuments({
+    serviceId,
+    status: "waiting"
+});
+
+const staffCount = await User.countDocuments({
+    role: "staff"
+});
+
+const counterCount = await Counter.countDocuments({
+    status: "open"
+});
+
+const ai = await predictWaitTime({
+
+    serviceId,
+
+    currentQueueCount: waitingCount,
+
+    averageServiceTime: service.estimatedTime || 10,
+
+    staffCount,
+
+    counterCount,
+
+    hourOfDay: new Date().getHours(),
+
+    dayOfWeek: new Date().getDay()
+
+});
+
+  res.status(201).json({
+    ...newQueue.toObject(),
+    predictedWaitTime: ai.predictedWaitTime
+});
   } catch (err) {
     res.status(500).json({
       message: "Error creating queue",
@@ -44,48 +83,81 @@ export const createQueue = async (req, res) => {
 export const getMyQueue = async (req, res) => {
   try {
     const userId = req.user.id;
+
     const queue = await Queue.findOne({
       userId,
       status: { $in: ["waiting", "serving"] },
     }).populate("serviceId");
 
+    // Người dùng chưa có vé
     if (!queue) {
-      return res.json(null);
+      return res.status(200).json(null);
     }
 
-    // số đang phục vụ
+    // Queue cũ đang tham chiếu tới service đã bị xóa
+    if (!queue.serviceId) {
+      await Queue.findByIdAndUpdate(queue._id, {
+        status: "cancelled",
+      });
+
+      return res.status(200).json(null);
+    }
+
     let currentQueue = await Queue.findOne({
-        serviceId: queue.serviceId._id,
-        status: "serving",
+      serviceId: queue.serviceId._id,
+      status: "serving",
     }).sort({ number: -1 });
 
     if (!currentQueue) {
-        currentQueue = await Queue.findOne({
-            serviceId: queue.serviceId._id,
-            status: "done",
-        }).sort({ number: -1 });
+      currentQueue = await Queue.findOne({
+        serviceId: queue.serviceId._id,
+        status: "done",
+      }).sort({ number: -1 });
     }
 
-    const currentServing = currentQueue
-        ? currentQueue.number
-        : 0;
+    const currentServing = currentQueue ? currentQueue.number : 0;
 
     const peopleAhead = await Queue.countDocuments({
-        serviceId: queue.serviceId._id,
-        status: "waiting",
-        number: { $lt: queue.number },
+      serviceId: queue.serviceId._id,
+      status: "waiting",
+      number: { $lt: queue.number },
     });
 
-    res.json({
-        ...queue.toObject(),
-        currentServing,
-        peopleAhead,
+    const waitingCount = await Queue.countDocuments({
+      serviceId: queue.serviceId._id,
+      status: "waiting",
+    });
+
+    const staffCount = await User.countDocuments({
+      role: "staff",
+    });
+
+    const counterCount = await Counter.countDocuments({
+      status: "open",
+    });
+
+    const ai = await predictWaitTime({
+      serviceId: queue.serviceId._id.toString(),
+      currentQueueCount: waitingCount,
+      averageServiceTime: queue.serviceId.estimatedTime || 10,
+      staffCount,
+      counterCount,
+      hourOfDay: new Date().getHours(),
+      dayOfWeek: new Date().getDay(),
+    });
+
+    return res.status(200).json({
+      ...queue.toObject(),
+      currentServing,
+      peopleAhead,
+      predictedWaitTime: ai?.predictedWaitTime ?? null,
     });
   } catch (err) {
-    console.error(err);
+    console.error("GET MY QUEUE ERROR:", err);
 
-    res.status(500).json({
-      message: err.message,
+    return res.status(500).json({
+      message: "Error getting queue",
+      error: err.message,
     });
   }
 };
@@ -138,10 +210,6 @@ export const serveQueue = async (req, res) => {
 
 }
 //PUT /api/queue/:id/done
-import QueueHistory from "../models/QueueHistory.js";
-import Service from "../models/Service.js";
-import Counter from "../models/Counter.js";
-import User from "../models/User.js";
 
 export const completeQueue = async (req, res) => {
 
@@ -159,7 +227,13 @@ export const completeQueue = async (req, res) => {
 
     // ========= AI DATA =========
 
-    const service = await Service.findById(queue.serviceId);
+const service = await Service.findById(queue.serviceId);
+
+if (!service) {
+    return res.status(404).json({
+        message: "Service not found"
+    });
+}
 
     const queueLength = await Queue.countDocuments({
         serviceId: queue.serviceId
@@ -190,11 +264,12 @@ export const completeQueue = async (req, res) => {
 
         queueLength,
 
-        averageServiceTime: service.averageServiceTime,
+        averageServiceTime: service.estimatedTime || 10,
 
         staffCount,
 
         counterCount,
+        currentQueueCount: queueLength,
 
         hourOfDay: hour,
 

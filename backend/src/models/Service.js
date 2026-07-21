@@ -7,7 +7,11 @@ const serviceSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
-    }
+    },
+  estimatedTime:{
+    type:Number,
+    default:10
+}
 });
 
 export default mongoose.model("Service", serviceSchema);

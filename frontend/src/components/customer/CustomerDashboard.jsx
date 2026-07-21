@@ -8,17 +8,62 @@ import Loading from "../common/Loading";
 import Profile from "./Profile";
 import Feedback from "./Feedback";
 import "./CustomerDashboard.css";
-
+import useSocket from "../../hooks/useSocket";
+import {
+    getNotifications
+} from "../../services/notification.service";
 const CustomerDashboard = () => {
+  
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentQueue, setCurrentQueue] = useState(null);
+  const [notifications, setNotifications] = useState([]);
   const [activeView, setActiveView] = useState("dashboard");
 
   // lấy user từ localStorage dưới dạng state để tự động cập nhật
   const [currentUser, setCurrentUser] = useState(() => 
     JSON.parse(localStorage.getItem("user") || "{}")
   );
+  // =========================
+// Reload Queue
+// =========================
+const reloadQueue = async () => {
+  try {
+    console.log("Reload Queue API");
+
+    const res = await getMyQueue();
+
+    console.log("Queue mới:", res.data);
+
+    // Khi backend trả null, xóa vé khỏi giao diện
+    setCurrentQueue(res.data ?? null);
+  } catch (err) {
+    console.error("Reload queue error:", err);
+
+    // 404 service cũ hoặc không còn queue thì xóa vé
+    if (err.response?.status === 404) {
+      setCurrentQueue(null);
+    }
+  }
+};
+// =========================
+// Reload Notifications
+// =========================
+const reloadNotifications = async () => {
+    console.log("Reload Notification API");
+
+    const res = await getNotifications();
+
+    console.log(res.data);
+
+    setNotifications(res.data);
+};
+
+  useSocket(
+  currentUser,
+  reloadQueue,
+  reloadNotifications
+);
 
 useEffect(() => {
   const fetchData = async () => {
@@ -30,7 +75,7 @@ useEffect(() => {
       // lấy queue user
       const resQueue = await getMyQueue();
       setCurrentQueue(resQueue.data || null);
-
+      await reloadNotifications();
     } catch (err) {
       console.error(err);
     } finally {
@@ -50,7 +95,16 @@ useEffect(() => {
     window.removeEventListener("storage", handleStorageChange);
   };
 }, []);
+useEffect(() => {
 
+  const interval = setInterval(async () => {
+    await reloadNotifications();
+    await reloadQueue();
+  }, 5000);
+
+  return () => clearInterval(interval);
+
+}, []);
   const handleCreateQueue = async (serviceId) => {
     if (currentQueue) {
       alert("⚠️ Bạn đang có một vé xếp hàng hoạt động. Vui lòng hoàn thành hoặc huỷ vé hiện tại trước khi đăng ký vé mới.");
@@ -59,11 +113,18 @@ useEffect(() => {
     try {
       const res = await createQueue(serviceId);
 
-      alert(`🎟️ Lấy vé thành công! Số thứ tự của bạn là: ${res.data.number}`);
-      // lấy lại queue đầy đủ
-      const queueRes = await getMyQueue();
+      alert(
+`🎟️ Số của bạn: ${res.data.number}
 
-      setCurrentQueue(queueRes.data);
+⏱️ Thời gian chờ dự kiến:
+${Math.round(res.data.predictedWaitTime)} phút`
+);
+      // lấy lại queue đầy đủ
+      // const queueRes = await getMyQueue();
+
+      // setCurrentQueue(queueRes.data);
+      await reloadQueue();
+      await reloadNotifications();
     } catch (err) {
       console.error(err);
       alert("❌ Lấy vé thất bại. Vui lòng thử lại sau.");
@@ -76,7 +137,9 @@ useEffect(() => {
   if (window.confirm("Bạn có chắc muốn huỷ vé không?")) {
     try {
       await cancelQueue(currentQueue._id);
-      setCurrentQueue(null);
+     // setCurrentQueue(null);
+     await reloadQueue();
+     await reloadNotifications();
     } catch (err) {
       console.error(err);
       alert("❌ Huỷ vé thất bại");
@@ -93,10 +156,22 @@ useEffect(() => {
   };
 
   // Lấy thông tin dịch vụ của vé đang chọn
-  const getActiveQueueService = () => {
-    if (!currentQueue) return null;
-    return services.find((s) => s._id === currentQueue.serviceId);
-  };
+ const getActiveQueueService = () => {
+  if (!currentQueue) return null;
+
+  // Nếu serviceId đã được populate
+  if (
+    currentQueue.serviceId &&
+    typeof currentQueue.serviceId === "object"
+  ) {
+    return currentQueue.serviceId;
+  }
+
+  // Nếu serviceId chỉ là chuỗi ObjectId
+  return services.find(
+    (service) => service._id === currentQueue.serviceId
+  ) || null;
+};
 
   const activeService = getActiveQueueService();
 
@@ -111,13 +186,14 @@ useEffect(() => {
   return (
     <div className="dashboard-container">
       {/* REUSABLE NAVBAR */}
-      <Navbar 
-        logoText="SMART QUEUE" 
-        user={currentUser} 
-        onLogout={handleLogout} 
-        onProfileClick={() => setActiveView("profile")}
-        navItems={navItems} 
-      />
+      <Navbar
+    logoText="SMART QUEUE"
+    user={currentUser}
+    notifications={notifications}
+    onLogout={handleLogout}
+    onProfileClick={() => setActiveView("profile")}
+    navItems={navItems}
+/>
 
       {/* MAIN CONTENT */}
       <main className="dashboard-main">
@@ -143,12 +219,18 @@ useEffect(() => {
             </section>
 
             {/* ACTIVE TICKET */}
-            <ActiveTicket
-              queue={currentQueue}
-              service={activeService}
-              onCancel={handleCancelQueue}
-            />
-
+            {currentQueue ? (
+  <ActiveTicket
+    key={currentQueue._id}
+    queue={currentQueue}
+    service={activeService}
+    onCancel={handleCancelQueue}
+  />
+) : (
+  <div className="no-active-ticket">
+    Bạn chưa có vé đang hoạt động.
+  </div>
+)}
             {/* SERVICES LIST */}
             <section className="services-section">
               <div className="services-list-header">
