@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   getServices,
@@ -50,32 +50,19 @@ const CustomerDashboard = () => {
   // Reload Queue
   // =========================
 
-  const reloadQueue = async () => {
+  const reloadQueue = useCallback(async () => {
+  try {
+    const res = await getMyQueue();
 
-    try {
+    setCurrentQueue(res.data ?? null);
+  } catch (err) {
+    console.error("Reload queue error:", err);
 
-      const res = await getMyQueue();
-
-      setCurrentQueue(res.data ?? null);
-
-
-    } catch(err){
-
-      console.error(
-        "Reload queue error:",
-        err
-      );
-
-
-      if(err.response?.status === 404){
-
-        setCurrentQueue(null);
-
-      }
-
+    if (err.response?.status === 404) {
+      setCurrentQueue(null);
     }
-
-  };
+  }
+}, []);
 
 
 
@@ -83,28 +70,25 @@ const CustomerDashboard = () => {
   // Reload Notification
   // =========================
 
-  const reloadNotifications = async () => {
+  const reloadNotifications = useCallback(async () => {
+  try {
+    const res = await getNotifications();
 
-    try {
+    setNotifications(
+      Array.isArray(res.data) ? res.data : []
+    );
+  } catch (err) {
+    console.error("Notification error:", err);
+  }
+}, []);
 
-      const res = await getNotifications();
+const handleQueueCompleted = useCallback(() => {
+  // Xóa vé khỏi giao diện ngay lập tức
+  setCurrentQueue(null);
 
-      setNotifications(
-        res.data || []
-      );
-
-
-    } catch(err){
-
-      console.error(
-        "Notification error:",
-        err
-      );
-
-    }
-
-  };
-
+  // Chuyển sang trang Feedback
+  setActiveView("feedback");
+}, []);
 
 
   // =========================
@@ -114,7 +98,8 @@ const CustomerDashboard = () => {
   useSocket(
     currentUser,
     reloadQueue,
-    reloadNotifications
+    reloadNotifications,
+    handleQueueCompleted
   );
 
 
@@ -221,7 +206,7 @@ const CustomerDashboard = () => {
 
 
 
-  },[]);
+  },[reloadQueue, reloadNotifications]);
 
 
 

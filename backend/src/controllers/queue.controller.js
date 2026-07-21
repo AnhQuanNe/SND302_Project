@@ -5,6 +5,7 @@ import Service from "../models/Service.js";
 import User from "../models/User.js";
 import Counter from "../models/Counter.js";
 import QueueHistory from "../models/QueueHistory.js";
+import { getIO } from "../config/socket.js";
 export const createQueue = async (req, res) => {
   try {
     const { serviceId } = req.body;
@@ -444,85 +445,116 @@ export const serveQueue = async (req, res) => {
 //PUT /api/queue/:id/done
 
 export const completeQueue = async (req, res) => {
-
+  try {
     const queue = await Queue.findById(req.params.id);
 
     if (!queue) {
-        return res.status(404).json({
-            message: "Queue not found"
-        });
+      return res.status(404).json({
+        message: "Queue not found",
+      });
+    }
+
+    if (queue.status === "done") {
+      return res.status(400).json({
+        message: "Queue already completed",
+      });
     }
 
     queue.status = "done";
+    queue.finishedAt = new Date();
 
     await queue.save();
 
-    // ========= AI DATA =========
+    const service = await Service.findById(queue.serviceId);
 
-const service = await Service.findById(queue.serviceId);
-
-if (!service) {
-    return res.status(404).json({
-        message: "Service not found"
-    });
-}
+    if (!service) {
+      return res.status(404).json({
+        message: "Service not found",
+      });
+    }
 
     const queueLength = await Queue.countDocuments({
-        serviceId: queue.serviceId
+      serviceId: queue.serviceId,
+      status: "waiting",
     });
 
     const staffCount = await User.countDocuments({
-        role: "staff"
+      role: "staff",
     });
 
-    const counterCount = await Counter.countDocuments();
+    const counterCount = await Counter.countDocuments({
+      status: "open",
+    });
 
-    const actualWaitTime =
-        (queue.updatedAt - queue.createdAt) / 60000;
+    // Thời gian chờ thực tế: từ lúc lấy vé đến lúc bắt đầu phục vụ
+    const actualWaitTime = queue.servingAt
+      ? (queue.servingAt.getTime() - queue.createdAt.getTime()) / 60000
+      : (queue.finishedAt.getTime() - queue.createdAt.getTime()) / 60000;
 
     const hour = queue.createdAt.getHours();
-
     const day = queue.createdAt.getDay();
 
-    await QueueHistory.create({
+    const historyData = {
+      queueId: queue._id,
+      serviceId: queue.serviceId,
+      userId: queue.userId,
+      queueNumber: queue.number,
 
-        queueId: queue._id,
+      queueLength,
+      currentQueueCount: queueLength,
 
-        serviceId: queue.serviceId,
+      averageServiceTime: service.estimatedTime || 10,
+      staffCount,
+      counterCount,
 
-        userId: queue.userId,
+      hourOfDay: hour,
+      dayOfWeek: day,
 
-        queueNumber: queue.number,
+      isPeakHour:
+        (hour >= 11 && hour <= 13) ||
+        (hour >= 17 && hour <= 19),
 
-        queueLength,
+      peakIntensity:
+        (hour >= 11 && hour <= 13) ||
+        (hour >= 17 && hour <= 19)
+          ? 1
+          : 0,
 
-        averageServiceTime: service.estimatedTime || 10,
+      actualWaitTime,
+    };
 
-        staffCount,
+    // Nếu schema QueueHistory bắt buộc staffId/counterId
+    if (queue.staffId) {
+      historyData.staffId = queue.staffId;
+    }
 
-        counterCount,
-        currentQueueCount: queueLength,
+    if (queue.counterId) {
+      historyData.counterId = queue.counterId;
+    }
 
-        hourOfDay: hour,
+    await QueueHistory.create(historyData);
 
-        dayOfWeek: day,
+    // Gửi realtime tới frontend
+    const io = getIO();
 
-        isPeakHour:
-            (hour >= 11 && hour <= 13) ||
-            (hour >= 17 && hour <= 19),
-
-        peakIntensity:
-            (hour >= 11 && hour <= 13) ||
-            (hour >= 17 && hour <= 19)
-                ? 1
-                : 0,
-
-        actualWaitTime
-
+    io.emit("queueCompleted", {
+      queueId: queue._id.toString(),
+      userId: queue.userId.toString(),
+      serviceId: queue.serviceId.toString(),
+      number: queue.number,
+      status: "done",
     });
 
-    res.json({
-        message: "Completed"
+    return res.status(200).json({
+      message: "Completed",
+      queue,
     });
+  } catch (error) {
+    console.error("COMPLETE QUEUE ERROR:", error);
 
-}
+    return res.status(500).json({
+      message: "Error completing queue",
+      error: error.message,
+    });
+  }
+};

@@ -2,55 +2,57 @@ import { useEffect } from "react";
 import socket from "../socket/socket";
 
 const useSocket = (
-    currentUser,
-    reloadQueue,
-    reloadNotifications
+  currentUser,
+  reloadQueue,
+  reloadNotifications,
+  onQueueCompleted
 ) => {
-
-    useEffect(() => {
+  useEffect(() => {
     if (!currentUser?._id) return;
 
     const handleCalled = async (data) => {
-        console.log("handleCalled", data);
+      if (
+        String(data.userId) !== String(currentUser._id)
+      ) {
+        return;
+      }
 
-        if (String(data.userId) !== String(currentUser._id)) return;
+      alert(`Đến lượt số ${data.number}`);
 
-        alert(`Đến lượt số ${data.number}`);
-
-        await reloadNotifications();
-        await reloadQueue();
+      await reloadNotifications();
+      await reloadQueue();
     };
 
     const handleCompleted = async (data) => {
-        console.log("handleCompleted", data);
+      if (
+        String(data.userId) !== String(currentUser._id)
+      ) {
+        return;
+      }
 
-        if (String(data.userId) !== String(currentUser._id)) return;
+      alert("Giao dịch đã hoàn thành. Vui lòng đánh giá dịch vụ.");
 
-        alert("Hoàn thành");
+      // Xóa vé và tải thông báo mới
+      await reloadQueue();
+      await reloadNotifications();
 
-        await reloadNotifications();
-        await reloadQueue();
+      // Chuyển sang Feedback
+      onQueueCompleted?.(data);
     };
-
-    socket.off("queueCalled");
-    socket.off("queueCompleted");
-    socket.off("queueSkipped");
-    socket.off("queueRecalled");
 
     socket.on("queueCalled", handleCalled);
     socket.on("queueCompleted", handleCompleted);
 
     return () => {
-        socket.off("queueCalled", handleCalled);
-        socket.off("queueCompleted", handleCompleted);
+      socket.off("queueCalled", handleCalled);
+      socket.off("queueCompleted", handleCompleted);
     };
-
-}, [
+  }, [
     currentUser?._id,
     reloadQueue,
-    reloadNotifications
-]);
-
+    reloadNotifications,
+    onQueueCompleted,
+  ]);
 };
 
 export default useSocket;
