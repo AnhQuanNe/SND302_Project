@@ -109,7 +109,7 @@ useEffect(() => {
   const navItems = [
     { label: "Home", active: activeView === "dashboard", onClick: () => setActiveView("dashboard") },
     { label: "Services", active: activeView === "services", onClick: () => setActiveView("services") },
-    { label: "Track Queue", active: false, onClick: () => setActiveView("dashboard") },
+    { label: "Track Queue", active: false, onClick: () => setActiveView("track") },
     { label: "Feedback", active: activeView === "feedback", onClick: () => setActiveView("feedback") }
   ];
 
