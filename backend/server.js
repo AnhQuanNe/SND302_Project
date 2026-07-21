@@ -1,42 +1,33 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import app from "./src/app.js";
-import connectDB from "./src/config/database.js";
-
 import http from "http";
 import { Server } from "socket.io";
-import { setIO } from "./src/config/socket.js";
 
-// ======================
-// Connect MongoDB
-// ======================
-connectDB();
+import app from "./src/app.js";
+import connectDB from "./src/config/database.js";
+import { setIO } from "./src/config/socket.js";
 
 const PORT = process.env.PORT || 5000;
 
-// ======================
-// Create HTTP Server
-// ======================
 const server = http.createServer(app);
 
-// ======================
-// Socket.IO
-// ======================
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   },
 });
 
-// lưu io để service sử dụng
 setIO(io);
 
-// khi client kết nối
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
-
   console.log("Total clients:", io.engine.clientsCount);
 
   socket.on("disconnect", () => {
@@ -45,9 +36,17 @@ io.on("connection", (socket) => {
   });
 });
 
-// ======================
-// Start Server
-// ======================
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+
+    server.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Server startup failed:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
