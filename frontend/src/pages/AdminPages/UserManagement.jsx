@@ -1,18 +1,12 @@
 import { useEffect, useState } from "react";
 import {
   getUsers,
-  // createUser,
-  // updateUser,
   lockUser,
   unlockUser,
 } from "../../services/admin.service";
 
-// Import Component Table và CSS
 import UserTable from "../../components/admin/UserManagement/UserTable";
 import styles from "../../components/admin/UserManagement/UserManagement.module.css";
-
-// Form Component được dự phòng, KHÔNG import:
-// import UserForm from "../../components/admin/UserManagement/UserForm";
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState([]);
@@ -20,17 +14,15 @@ export default function UserManagementPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [pagination, setPagination] = useState(null);
-
-  /* =========================================
-     STATE DỰ PHÒNG CHO VIỆC THÊM/SỬA
-     ========================================= */
-  // const [form, setForm] = useState({ fullName: "", email: "", password: "", role: "customer" });
-  // const [editingId, setEditingId] = useState(null);
+  
+  // State cho chức năng tìm kiếm
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const res = await getUsers(page, limit);
+      const res = await getUsers(page, limit, "customer", searchTerm);
       setUsers(res.data.users);
       setPagination(res.data.pagination);
     } catch (err) {
@@ -40,30 +32,22 @@ export default function UserManagementPage() {
     }
   };
 
+  // 🔥 LOGIC DEBOUNCE TÌM KIẾM REAL-TIME
+  useEffect(() => {
+    // Đặt bộ đếm thời gian: Sau khi ngừng gõ 500ms thì mới cập nhật searchTerm
+    const delayDebounceFn = setTimeout(() => {
+      setSearchTerm(searchInput);
+      setPage(1); // Đưa về trang 1 mỗi khi có từ khóa mới
+    }, 500);
+
+    // Dọn dẹp bộ đếm nếu người dùng tiếp tục gõ (chống gọi API liên tục)
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchInput]);
+
+  // Load lại data mỗi khi page hoặc searchTerm chính thức thay đổi
   useEffect(() => {
     loadUsers();
-  }, [page]);
-
-  /* =========================================
-     LOGIC DỰ PHÒNG CHO VIỆC THÊM/SỬA
-     ========================================= */
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     if (editingId) await updateUser(editingId, form);
-  //     else await createUser(form);
-  //     setForm({ fullName: "", email: "", password: "", role: "customer" });
-  //     setEditingId(null);
-  //     loadUsers();
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // };
-
-  // const handleEdit = (user) => {
-  //   setEditingId(user._id);
-  //   setForm({ fullName: user.fullName, email: user.email, password: "", role: user.role });
-  // };
+  }, [page, searchTerm]);
 
   const handleToggleLock = async (user) => {
     try {
@@ -72,7 +56,6 @@ export default function UserManagementPage() {
       } else {
         await lockUser(user._id);
       }
-
       loadUsers();
     } catch (err) {
       console.log(err);
@@ -83,15 +66,43 @@ export default function UserManagementPage() {
     <div className={styles.container}>
       <h1 className={styles.pageTitle}>Quản lý Người dùng</h1>
 
-      {/* COMPONENT FORM DỰ PHÒNG */}
-      {/* <UserForm 
-          form={form} 
-          setForm={setForm} 
-          onSubmit={handleSubmit} 
-          editingId={editingId} 
-          onCancel={() => { setEditingId(null); setForm({...}); }} 
-        /> 
-      */}
+      {/* KHỐI TÌM KIẾM REAL-TIME */}
+      <div style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: "10px", width: "100%" }}>
+          <input
+            type="text"
+            placeholder="Gõ để tìm kiếm email hoặc họ tên..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)} // Gõ đến đâu, lưu vào searchInput đến đó
+            style={{
+              padding: "10px 16px",
+              borderRadius: "8px",
+              border: "1px solid #cbd5e1",
+              width: "350px",
+              outline: "none",
+              fontSize: "14px"
+            }}
+          />
+          {/* Chỉ hiện nút Xóa nếu input có chữ */}
+          {searchInput && (
+             <button 
+               type="button"
+               onClick={() => setSearchInput("")}
+               style={{
+                 padding: "8px 16px",
+                 backgroundColor: "#f1f5f9",
+                 color: "#64748b",
+                 border: "1px solid #cbd5e1",
+                 borderRadius: "6px",
+                 cursor: "pointer",
+                 fontWeight: "600"
+               }}
+             >
+               Xóa
+             </button>
+          )}
+        </div>
+      </div>
 
       {/* Hiển thị danh sách */}
       {loading ? (
@@ -103,6 +114,7 @@ export default function UserManagementPage() {
           onToggleLock={handleToggleLock}
         />
       )}
+      
       {pagination && (
         <div className={styles.paginationContainer}>
           <button

@@ -26,13 +26,13 @@ export const login = async (req, res) => {
 
     if (user.status === "inactive") {
       return res.status(403).json({
-        message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để được hỗ trợ."
+        message: "Tài khoản của bạn đã bị khóa bởi Admin. Vui lòng liên hệ Admin để được hỗ trợ."
       });
     }
 
     if (user.status === "banned") {
       return res.status(403).json({
-        message: "Tài khoản của bạn đã bị cấm. Vui lòng liên hệ quản trị viên để được hỗ trợ."
+        message: "Tài khoản của bạn đã bị cấm. Vui lòng liên hệ Admin để được hỗ trợ."
       });
     }
 

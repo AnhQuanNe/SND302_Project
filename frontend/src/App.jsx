@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/AdminPages/Dashboard";
 import AdminPlaceholderPage from "./pages/AdminPages/AdminPlaceholderPage";
 import CounterManagement from "./pages/AdminPages/CounterManagement";
 import QueueManagement from "./pages/AdminPages/QueueManagement";
+import StaffManagementPage from "./pages/AdminPages/StaffManagementPage";
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="/admin/staffs" element={<StaffManagementPage />} />
           <Route path="feedback" element={<Feedback />} />
           <Route path="services" element={<ServiceManagement />} />
           <Route 

@@ -15,6 +15,7 @@ import CurrentQueue from "./CurrentQueue";
 import StaffActions from "./StaffActions";
 import SkippedQueueList from "./SkippedQueueList";
 import QueueHistory from "./QueueHistory"; // thêm
+import Profile from "../../components/customer/Profile";
 
 import "./StaffDashboard.css";
 
@@ -24,6 +25,7 @@ const StaffDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [skippedQueues, setSkippedQueues] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [activeView, setActiveView] = useState("dashboard");
   const [currentUser] = useState(
     JSON.parse(localStorage.getItem("user") || "{}")
   );
@@ -88,60 +90,46 @@ const StaffDashboard = () => {
         logoText="SMART QUEUE"
         user={currentUser}
         onLogout={handleLogout}
+        onProfileClick={() => setActiveView("profile")}
       />
 
-      <div className="staff-dashboard">
+      {/* SỬA TẠI ĐÂY: Thêm điều kiện kiểm tra activeView */}
+{activeView === "profile" ? (
+  <Profile onBack={() => setActiveView("dashboard")} />
+) : (
+  <div className="staff-dashboard">
+    <h2 className="staff-title">
+      Staff Dashboard
+    </h2>
 
-        <h2 className="staff-title">
-          Staff Dashboard
-        </h2>
+    <div className="staff-top">
+      <CounterCard counter={counter} />
+      <CurrentQueue queue={currentQueue} />
+    </div>
 
-        <div className="staff-top">
+    <StaffActions
+      queue={currentQueue}
+      counter={counter}
+      reload={loadData}
+    />
 
-          <CounterCard counter={counter} />
+    <SkippedQueueList
+      queues={skippedQueues}
+      reload={loadData}
+    />
 
-          <CurrentQueue queue={currentQueue} />
+    <button
+      className="history-btn"
+      onClick={() => setShowHistory(!showHistory)}
+    >
+      {showHistory
+        ? "Ẩn lịch sử xử lý"
+        : "Xem lịch sử xử lý"}
+    </button>
 
-        </div>
-
-        <StaffActions
-          queue={currentQueue}
-          counter={counter}
-          reload={loadData}
-        />
-
-        <SkippedQueueList
-          queues={skippedQueues}
-          reload={loadData}
-        />
-
-        {/* ===============================
-            Queue History
-        ================================ */}
-
-
-        <button
-          className="history-btn"
-          onClick={() => setShowHistory(!showHistory)}
-        >
-
-          {
-            showHistory
-              ? "Ẩn lịch sử xử lý"
-              : "Xem lịch sử xử lý"
-          }
-
-        </button>
-
-
-
-        {
-          showHistory && (
-            <QueueHistory />
-          )
-        }
-
-      </div>
+    {showHistory && <QueueHistory />}
+  </div>
+)}
 
       <Footer />
     </>

@@ -6,7 +6,9 @@ import {
   // createUser,
   // updateUser,
   lockUser,
-  unlockUser
+  unlockUser,
+  createStaff,
+  resetStaffPassword
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
@@ -24,5 +26,9 @@ router.patch("/users/:id/lock", lockUser);
 router.patch("/users/:id/unlock", unlockUser);
 
 router.delete("/users/:id", lockUser);
+
+router.post("/users/staff", createStaff);
+
+router.put("/users/staff/:id/reset-password", resetStaffPassword);
 
 export default router;

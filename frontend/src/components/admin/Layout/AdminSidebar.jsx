@@ -16,6 +16,7 @@ export default function AdminSidebar() {
       title: "Quản lý",
       items: [
         { label: "Người dùng", icon: "ti-users", path: "/admin/users" },
+        { label: "Staff", icon: "ti-users", path: "/admin/staffs" },
         { label: "Hàng đợi", icon: "ti-list", path: "/admin/queue" },
         { label: "Dịch vụ", icon: "ti-layout-grid", path: "/admin/services" },
         { label: "Quầy phục vụ", icon: "ti-device-desktop", path: "/admin/counters" },
