@@ -3,7 +3,7 @@ import API from "./api";
 const BASE = "/admin/users";
 
 export const getUsers = (page, limit, role, search = "") => 
-  API.get(`/admin/users?page=${page}&limit=${limit}&role=${role}&search=${search}`);
+  API.get(`${BASE}?page=${page}&limit=${limit}&role=${role}&search=${search}`);
 
 // export const createUser = (data) =>
 //   API.post(BASE, data);
@@ -20,5 +20,8 @@ export const lockUser = (id) =>
 export const unlockUser = (id) =>
   API.patch(`${BASE}/${id}/unlock`);
 
-export const createStaff = (data) => API.post("/admin/users/staff", data); 
-export const resetStaffPassword = (id, newPassword) => API.put(`/admin/users/staff/${id}/reset-password`, { newPassword });
+export const createStaff = (data) => 
+  API.post(`${BASE}/staff`, data); 
+
+export const resetStaffPassword = (id, newPassword) => 
+  API.put(`${BASE}/staff/${id}/reset-password`, { newPassword });
