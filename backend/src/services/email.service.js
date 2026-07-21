@@ -1,9 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import dns from "node:dns";
 import nodemailer from "nodemailer";
 
-// Không log mật khẩu email ra console
+// Ép Node ưu tiên IPv4 khi resolve smtp.gmail.com
+dns.setDefaultResultOrder("ipv4first");
+
 console.log("EMAIL_USER configured:", Boolean(process.env.EMAIL_USER));
 console.log("EMAIL_PASS configured:", Boolean(process.env.EMAIL_PASS));
 
@@ -11,21 +14,27 @@ const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
   secure: true,
-  family: 4,
 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 20000,
+  connectionTimeout: 20000,
+  greetingTimeout: 20000,
+  socketTimeout: 30000,
+  dnsTimeout: 20000,
 });
 
 transporter.verify((error) => {
   if (error) {
-    console.error("SMTP VERIFY ERROR:", error.message);
+    console.error("SMTP VERIFY ERROR:", {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      address: error.address,
+      port: error.port,
+    });
   } else {
     console.log("SMTP server is ready");
   }
@@ -51,7 +60,13 @@ export const sendVerificationEmail = async (email, code) => {
       success: true,
     };
   } catch (error) {
-    console.error("SEND EMAIL ERROR:", error.message);
+    console.error("SEND EMAIL ERROR:", {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      address: error.address,
+      port: error.port,
+    });
 
     return {
       success: false,
