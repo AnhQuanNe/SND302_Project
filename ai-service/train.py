@@ -5,12 +5,14 @@ import pandas as pd
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
+from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from config import MODEL_PATH, SCALER_PATH
+from config import MODEL_PATH
 
 load_dotenv()
 
@@ -20,10 +22,12 @@ load_dotenv()
 
 MONGO_URI = os.getenv("MONGO_URI")
 
+if not MONGO_URI:
+    raise Exception("Missing MONGO_URI environment variable")
+
 client = MongoClient(MONGO_URI)
 
 db = client["queue_management"]
-
 collection = db["queuehistories"]
 
 print("===================================")
@@ -42,22 +46,25 @@ if count == 0:
 # Load Data
 # ===========================================
 
-history = list(collection.find(
-    {},
-    {
-        "_id": 0,
-        "currentQueueCount": 1,
-        "queueLength": 1,
-        "hourOfDay": 1,
-        "dayOfWeek": 1,
-        "averageServiceTime": 1,
-        "staffCount": 1,
-        "counterCount": 1,
-        "isPeakHour": 1,
-        "peakIntensity": 1,
-        "actualWaitTime": 1
-    }
-))
+history = list(
+    collection.find(
+        {},
+        {
+            "_id": 0,
+            "serviceId": 1,
+            "currentQueueCount": 1,
+            "queueLength": 1,
+            "hourOfDay": 1,
+            "dayOfWeek": 1,
+            "averageServiceTime": 1,
+            "staffCount": 1,
+            "counterCount": 1,
+            "isPeakHour": 1,
+            "peakIntensity": 1,
+            "actualWaitTime": 1,
+        },
+    )
+)
 
 df = pd.DataFrame(history)
 
@@ -72,46 +79,88 @@ if "currentQueueCount" not in df.columns:
     if "queueLength" in df.columns:
         df["currentQueueCount"] = df["queueLength"]
 
+# Nếu một số document thiếu currentQueueCount
+if "queueLength" in df.columns:
+    df["currentQueueCount"] = df["currentQueueCount"].fillna(
+        df["queueLength"]
+    )
+
+# ===========================================
+# Convert serviceId
+# ===========================================
+
+if "serviceId" not in df.columns:
+    raise Exception(
+        "QueueHistory does not contain serviceId. "
+        "You must save serviceId in queuehistories."
+    )
+
+df["serviceId"] = df["serviceId"].astype(str)
+
 # ===========================================
 # Clean Data
 # ===========================================
 
-df = df.fillna(0)
+NUMERIC_FEATURES = [
+    "currentQueueCount",
+    "hourOfDay",
+    "dayOfWeek",
+    "averageServiceTime",
+    "staffCount",
+    "counterCount",
+    "isPeakHour",
+    "peakIntensity",
+]
+
+CATEGORICAL_FEATURES = [
+    "serviceId",
+]
+
+TARGET = "actualWaitTime"
+
+required_columns = (
+    NUMERIC_FEATURES
+    + CATEGORICAL_FEATURES
+    + [TARGET]
+)
+
+missing_columns = [
+    column
+    for column in required_columns
+    if column not in df.columns
+]
+
+if missing_columns:
+    raise Exception(
+        f"Missing columns: {missing_columns}"
+    )
+
+for column in NUMERIC_FEATURES + [TARGET]:
+    df[column] = pd.to_numeric(
+        df[column],
+        errors="coerce",
+    )
+
+df[NUMERIC_FEATURES] = df[NUMERIC_FEATURES].fillna(0)
+
+df = df.dropna(subset=[TARGET, "serviceId"])
+
+if df.empty:
+    raise Exception("No valid training records after cleaning!")
 
 print("\n========== SAMPLE DATA ==========")
 print(df.head())
 
-print("\n========== NULL ==========")
-print(df.isnull().sum())
+print("\n========== SERVICE COUNTS ==========")
+print(df["serviceId"].value_counts())
 
 # ===========================================
 # Feature
 # ===========================================
 
-FEATURES = [
-
-    "currentQueueCount",
-
-    "hourOfDay",
-
-    "dayOfWeek",
-
-    "averageServiceTime",
-
-    "staffCount",
-
-    "counterCount",
-
-    "isPeakHour",
-
-    "peakIntensity"
-
-]
-
-TARGET = "actualWaitTime"
+FEATURES = CATEGORICAL_FEATURES + NUMERIC_FEATURES
 
 X = df[FEATURES]
-
 y = df[TARGET]
 
 # ===========================================
@@ -119,101 +168,94 @@ y = df[TARGET]
 # ===========================================
 
 X_train, X_test, y_train, y_test = train_test_split(
-
     X,
-
     y,
-
     test_size=0.2,
-
-    random_state=42
-
+    random_state=42,
 )
 
 # ===========================================
-# Standard Scale
+# Preprocessing
 # ===========================================
 
-scaler = StandardScaler()
-
-X_train_scaled = scaler.fit_transform(X_train)
-
-X_test_scaled = scaler.transform(X_test)
-
-# ===========================================
-# Train Model
-# ===========================================
-
-model = RandomForestRegressor(
-
-    n_estimators=200,
-
-    random_state=42
-
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            StandardScaler(),
+            NUMERIC_FEATURES,
+        ),
+        (
+            "service",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            ),
+            CATEGORICAL_FEATURES,
+        ),
+    ]
 )
 
-model.fit(X_train_scaled, y_train)
+# ===========================================
+# Pipeline
+# ===========================================
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor,
+        ),
+        (
+            "model",
+            RandomForestRegressor(
+                n_estimators=200,
+                random_state=42,
+            ),
+        ),
+    ]
+)
+
+# ===========================================
+# Train
+# ===========================================
+
+pipeline.fit(X_train, y_train)
 
 # ===========================================
 # Evaluate
 # ===========================================
 
-prediction = model.predict(X_test_scaled)
+prediction = pipeline.predict(X_test)
 
-mae = mean_absolute_error(y_test, prediction)
+mae = mean_absolute_error(
+    y_test,
+    prediction,
+)
 
-r2 = r2_score(y_test, prediction)
+r2 = r2_score(
+    y_test,
+    prediction,
+)
 
 print("\n===================================")
 print("Model Evaluation")
 print("===================================")
 
 print("MAE :", round(mae, 2), "minutes")
-
 print("R2  :", round(r2, 4))
 
 # ===========================================
-# Feature Importance
+# Save Pipeline
 # ===========================================
 
-importance = pd.DataFrame({
-
-    "Feature": FEATURES,
-
-    "Importance": model.feature_importances_
-
-})
-
-importance = importance.sort_values(
-
-    by="Importance",
-
-    ascending=False
-
-)
-
-print("\n===================================")
-print("Feature Importance")
-print("===================================")
-
-print(importance)
-
-# ===========================================
-# Save
-# ===========================================
-
-joblib.dump(model, MODEL_PATH)
-
-joblib.dump(scaler, SCALER_PATH)
+joblib.dump(pipeline, MODEL_PATH)
 
 print("\n===================================")
 print("AI MODEL TRAINED SUCCESSFULLY")
 print("===================================")
 
 print("Total Records :", len(df))
-
+print("Services      :", df["serviceId"].nunique())
 print("Model Saved   :", MODEL_PATH)
-
-print("Scaler Saved  :", SCALER_PATH)
 
 print("===================================")

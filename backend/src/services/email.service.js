@@ -12,7 +12,7 @@ export const sendVerificationEmail = async (email, code) => {
     }
 
     const { data, error } = await resend.emails.send({
-      from: "Smart Queue <onboarding@resend.dev>",
+      from: "Smart Queue <SmartQueue@resend.dev>",
       to: [email],
       subject: "Smart Queue Email Verification",
       html: `

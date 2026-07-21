@@ -1,26 +1,25 @@
 import joblib
 
 from config import MODEL_PATH
-from config import SCALER_PATH
+
 
 model = None
-scaler = None
 
 
 def load_model():
-
     global model
-    global scaler
 
     model = joblib.load(MODEL_PATH)
 
-    scaler = joblib.load(SCALER_PATH)
+    print("AI model loaded successfully")
 
 
 def predict(feature):
+    global model
 
-    x = scaler.transform(feature)
+    if model is None:
+        load_model()
 
-    result = model.predict(x)
+    result = model.predict(feature)
 
     return float(result[0])
