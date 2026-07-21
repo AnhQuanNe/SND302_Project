@@ -126,13 +126,28 @@ export const register = async (req, res) => {
     });
 
     //Send email OTP
-    await sendVerificationEmail(user.email, verificationCode);
+    const emailResult = await sendVerificationEmail(
+  user.email,
+  verificationCode
+);
 
-    // const token = generateToken({id: user._id, role: user.role});
+if (!emailResult.success) {
+  console.error(
+    "REGISTER EMAIL ERROR:",
+    emailResult.error
+  );
 
-    return res.status(201).json({
-      message: "Register Success. Please verify your email"
-    })
+  // Xóa user vừa tạo vì họ chưa nhận được OTP
+  await User.findByIdAndDelete(user._id);
+
+  return res.status(503).json({
+    message: "Cannot send verification email. Please try again.",
+  });
+}
+
+return res.status(201).json({
+  message: "Register Success. Please verify your email",
+});
 
   } catch (error) {
     res.status(500).json({
@@ -168,15 +183,25 @@ export const forgotPassword = async (req, res) => {
     await user.save();
 
     // Gửi mail
-    await sendVerificationEmail(
-      user.email,
-      verificationCode
-    );
+    const emailResult = await sendVerificationEmail(
+  user.email,
+  verificationCode
+);
 
-    return res.status(200).json({
-      message: "OTP has been sent to your email",
-    });
+if (!emailResult.success) {
+  console.error(
+    "FORGOT PASSWORD EMAIL ERROR:",
+    emailResult.error
+  );
 
+  return res.status(503).json({
+    message: "Cannot send password reset OTP. Please try again.",
+  });
+}
+
+return res.status(200).json({
+  message: "OTP has been sent to your email",
+});
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -267,14 +292,27 @@ export const resendOTP = async (req, res) => {
     await user.save();
 
     // Gửi email với try-catch riêng
-    try {
-      await sendVerificationEmail(normalizedEmail, verificationCode);
-      console.log("✅ Gửi email OTP thành công");
-    } catch (emailError) {
-      console.error("❌ Lỗi gửi email:", emailError.message);
-      // Vẫn cho phép resend thành công dù email lỗi (để test)
-      // return res.status(500).json({ message: "Không thể gửi email. Vui lòng kiểm tra cấu hình Gmail" });
-    }
+   const emailResult = await sendVerificationEmail(
+  normalizedEmail,
+  verificationCode
+);
+
+if (!emailResult.success) {
+  console.error(
+    "RESEND OTP EMAIL ERROR:",
+    emailResult.error
+  );
+
+  return res.status(503).json({
+    message: "Cannot send OTP. Please try again later.",
+  });
+}
+
+console.log("OTP email sent successfully");
+
+return res.status(200).json({
+  message: "New OTP has been sent to your email",
+});
 
     res.status(200).json({
       message: "New OTP has been sent to your email"

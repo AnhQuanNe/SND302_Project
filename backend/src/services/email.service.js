@@ -1,72 +1,64 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import dns from "node:dns";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-// Ép Node ưu tiên IPv4 khi resolve smtp.gmail.com
-dns.setDefaultResultOrder("ipv4first");
-
-console.log("EMAIL_USER configured:", Boolean(process.env.EMAIL_USER));
-console.log("EMAIL_PASS configured:", Boolean(process.env.EMAIL_PASS));
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-
-  connectionTimeout: 20000,
-  greetingTimeout: 20000,
-  socketTimeout: 30000,
-  dnsTimeout: 20000,
-});
-
-transporter.verify((error) => {
-  if (error) {
-    console.error("SMTP VERIFY ERROR:", {
-      message: error.message,
-      code: error.code,
-      command: error.command,
-      address: error.address,
-      port: error.port,
-    });
-  } else {
-    console.log("SMTP server is ready");
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendVerificationEmail = async (email, code) => {
   try {
-    const info = await transporter.sendMail({
-      from: `"Smart Queue" <${process.env.EMAIL_USER}>`,
-      to: email,
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY is not configured");
+    }
+
+    const { data, error } = await resend.emails.send({
+      from: "Smart Queue <onboarding@resend.dev>",
+      to: [email],
       subject: "Smart Queue Email Verification",
       html: `
-        <h2>Email Verification</h2>
-        <p>Your verification code is:</p>
-        <h1>${code}</h1>
-        <p>This code will expire in 10 minutes.</p>
+        <div style="font-family: Arial, sans-serif; padding: 24px;">
+          <h2>Smart Queue Email Verification</h2>
+
+          <p>Your verification code is:</p>
+
+          <div
+            style="
+              font-size: 32px;
+              font-weight: bold;
+              letter-spacing: 8px;
+              padding: 16px 0;
+            "
+          >
+            ${code}
+          </div>
+
+          <p>This code will expire in 10 minutes.</p>
+
+          <p>
+            If you did not create a Smart Queue account,
+            you can ignore this email.
+          </p>
+        </div>
       `,
     });
 
-    console.log("Verification email sent:", info.messageId);
+    if (error) {
+      console.error("RESEND ERROR:", error);
+
+      return {
+        success: false,
+        error: error.message || "Cannot send verification email",
+      };
+    }
+
+    console.log("Verification email sent:", data?.id);
 
     return {
       success: true,
+      id: data?.id,
     };
   } catch (error) {
-    console.error("SEND EMAIL ERROR:", {
-      message: error.message,
-      code: error.code,
-      command: error.command,
-      address: error.address,
-      port: error.port,
-    });
+    console.error("SEND EMAIL ERROR:", error.message);
 
     return {
       success: false,
