@@ -386,3 +386,20 @@ export const getQueueHistory = async (staffId) => {
     .populate("counterId", "counterName")
     .sort({ servedAt: -1 });
 };
+
+// =========================================
+// Lấy danh sách khách đang Waiting/Cancelled
+// =========================================
+export const getWaitingQueues = async () => {
+  return await Queue.find({
+    status: {
+      $in: ["waiting", "cancelled"],
+    },
+  })
+    .select("number status createdAt")
+    .populate("userId", "fullName")
+    .populate("serviceId", "name")
+    .sort({
+      number: 1,
+    });
+};

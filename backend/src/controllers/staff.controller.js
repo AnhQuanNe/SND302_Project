@@ -8,6 +8,7 @@ import {
   getCounterInfo,
   getSkippedQueues,
   getQueueHistory,
+  getWaitingQueues,
 } from "../services/staff.service.js";
 
 /**
@@ -204,6 +205,28 @@ export const getHistory = async (req, res) => {
       data: history,
     });
   } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// =========================================
+// Lấy danh sách khách Waiting/Cancelled
+// =========================================
+export const getWaitingQueuesController = async (req, res) => {
+  try {
+    const queues = await getWaitingQueues();
+
+    res.status(200).json({
+      success: true,
+      count: queues.length,
+      data: queues,
+    });
+  } catch (error) {
+    console.error("Get waiting queues error:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,

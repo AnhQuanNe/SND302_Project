@@ -16,6 +16,7 @@ import StaffActions from "./StaffActions";
 import SkippedQueueList from "./SkippedQueueList";
 import QueueHistory from "./QueueHistory"; // thêm
 import Profile from "../../components/customer/Profile";
+import WaitingQueueList from "./WaitingQueueList";
 
 import "./StaffDashboard.css";
 
@@ -25,6 +26,7 @@ const StaffDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [skippedQueues, setSkippedQueues] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [showWaiting, setShowWaiting] = useState(false);
   const [activeView, setActiveView] = useState("dashboard");
   const [currentUser] = useState(
     JSON.parse(localStorage.getItem("user") || "{}")
@@ -94,42 +96,60 @@ const StaffDashboard = () => {
       />
 
       {/* SỬA TẠI ĐÂY: Thêm điều kiện kiểm tra activeView */}
-{activeView === "profile" ? (
-  <Profile onBack={() => setActiveView("dashboard")} />
-) : (
-  <div className="staff-dashboard">
-    <h2 className="staff-title">
-      Staff Dashboard
-    </h2>
+      {activeView === "profile" ? (
+        <Profile onBack={() => setActiveView("dashboard")} />
+      ) : (
+        <div className="staff-dashboard">
+          <h2 className="staff-title">
+            Staff Dashboard
+          </h2>
 
-    <div className="staff-top">
-      <CounterCard counter={counter} />
-      <CurrentQueue queue={currentQueue} />
-    </div>
+          <div className="staff-top">
+            <CounterCard counter={counter} />
+            <CurrentQueue queue={currentQueue} />
+          </div>
 
-    <StaffActions
-      queue={currentQueue}
-      counter={counter}
-      reload={loadData}
-    />
+          <StaffActions
+            queue={currentQueue}
+            counter={counter}
+            reload={loadData}
+          />
 
-    <SkippedQueueList
-      queues={skippedQueues}
-      reload={loadData}
-    />
+          <SkippedQueueList
+            queues={skippedQueues}
+            reload={loadData}
+          />
 
-    <button
-      className="history-btn"
-      onClick={() => setShowHistory(!showHistory)}
-    >
-      {showHistory
-        ? "Ẩn lịch sử xử lý"
-        : "Xem lịch sử xử lý"}
-    </button>
+          <button
+            className="history-btn"
+            onClick={() => setShowWaiting(!showWaiting)}
+          >
+            {
+              showWaiting
+                ? "Ẩn danh sách hàng chờ"
+                : "Xem danh sách hàng chờ"
+            }
+          </button>
 
-    {showHistory && <QueueHistory />}
-  </div>
-)}
+
+          {
+            showWaiting && (
+              <WaitingQueueList />
+            )
+          }
+
+          <button
+            className="history-btn"
+            onClick={() => setShowHistory(!showHistory)}
+          >
+            {showHistory
+              ? "Ẩn lịch sử xử lý"
+              : "Xem lịch sử xử lý"}
+          </button>
+
+          {showHistory && <QueueHistory />}
+        </div>
+      )}
 
       <Footer />
     </>

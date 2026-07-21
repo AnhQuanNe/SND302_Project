@@ -32,6 +32,10 @@ export const getSkippedQueues = () =>
 export const getStaffHistory = () =>
   API.get("/staff/history");
 
+// Lấy danh sách khách Waiting/Cancelled
+export const getWaitingQueues = () =>
+  API.get("/staff/waiting");
+
 // ==============================
 // Counter
 // ==============================
