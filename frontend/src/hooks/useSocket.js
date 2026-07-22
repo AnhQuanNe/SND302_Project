@@ -23,22 +23,27 @@ const useSocket = (
       await reloadQueue();
     };
 
-    const handleCompleted = async (data) => {
-      if (
-        String(data.userId) !== String(currentUser._id)
-      ) {
-        return;
-      }
+const handleCompleted = async (data) => {
+  console.log("===== RECEIVED queueCompleted =====");
+  console.log(data);
+  console.log("Current user:", currentUser);
 
-      alert("Giao dịch đã hoàn thành. Vui lòng đánh giá dịch vụ.");
+  if (String(data.userId) !== String(currentUser._id)) {
+    console.log("User không khớp");
+    return;
+  }
 
-      // Xóa vé và tải thông báo mới
-      await reloadQueue();
-      await reloadNotifications();
+  console.log("ĐÚNG USER -> chuyển Feedback");
 
-      // Chuyển sang Feedback
-      onQueueCompleted?.(data);
-    };
+  onQueueCompleted?.(data);
+
+  try {
+    await reloadQueue();
+    await reloadNotifications();
+  } catch (e) {
+    console.error(e);
+  }
+};
 
     socket.on("queueCalled", handleCalled);
     socket.on("queueCompleted", handleCompleted);
